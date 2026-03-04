@@ -36,12 +36,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "RoastTrack",
+    url: "https://roasttrack.vercel.app",
   },
   twitter: {
     card: "summary_large_image",
     title: "RoastTrack — AI Diss Track Generator",
     description: "Generate a personalized AI roast song about your friend in seconds.",
+    creator: "@roasttrack",
   },
+  metadataBase: new URL("https://roasttrack.vercel.app"),
 };
 
 export default function RootLayout({
