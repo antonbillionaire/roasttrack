@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken, getUserGenerations } from "@/lib/db";
+import { rateLimit, getIP } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  // Rate limit: 20 requests per minute per IP
+  const ip = getIP(req.headers);
+  const { allowed } = rateLimit(`me:${ip}`, 20, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const token = req.nextUrl.searchParams.get("token");
 
-  if (!token) {
+  if (!token || token.length > 100) {
     return NextResponse.json({ error: "Token required" }, { status: 400 });
   }
 

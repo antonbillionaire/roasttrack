@@ -2,22 +2,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateLyrics } from "@/lib/lyrics";
 import { generateMusic } from "@/lib/music";
 import { supabaseAdmin } from "@/lib/supabase";
-import { getUserByToken, deductCredit, recordGeneration } from "@/lib/db";
+import { getUserByToken, deductCredit, recordGeneration, countFreePreviewsToday } from "@/lib/db";
+import { rateLimit, getIP } from "@/lib/rate-limit";
+
+const MAX_FREE_PREVIEWS_PER_DAY = 1;
+const MAX_NAME_LENGTH = 50;
+const MAX_FACT_LENGTH = 150;
+const MAX_FACTS = 5;
 
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 10 requests per minute per IP (burst protection)
+    const ip = getIP(req.headers);
+    const { allowed } = rateLimit(`generate:${ip}`, 10, 60_000);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests. Slow down!" }, { status: 429 });
+    }
+
     const body = await req.json();
     const { name, facts, genre, roastLevel, language, accessToken } = body;
 
+    // Input validation
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
-    if (!Array.isArray(facts)) {
-      return NextResponse.json({ error: "Facts must be an array" }, { status: 400 });
+    if (name.trim().length > MAX_NAME_LENGTH) {
+      return NextResponse.json({ error: "Name too long" }, { status: 400 });
     }
-    const validFacts = facts.filter((f: string) => typeof f === "string" && f.trim());
+    if (!Array.isArray(facts) || facts.length > MAX_FACTS) {
+      return NextResponse.json({ error: "Invalid facts" }, { status: 400 });
+    }
+    const validFacts = facts
+      .filter((f: string) => typeof f === "string" && f.trim())
+      .map((f: string) => f.trim().slice(0, MAX_FACT_LENGTH));
     if (validFacts.length === 0) {
       return NextResponse.json({ error: "At least one fact is required" }, { status: 400 });
     }
@@ -43,6 +62,15 @@ export async function POST(req: NextRequest) {
       }
       userId = user.id;
       isFreePreview = false;
+    } else {
+      // Free preview — enforce daily IP limit
+      const todayCount = await countFreePreviewsToday(ip);
+      if (todayCount >= MAX_FREE_PREVIEWS_PER_DAY) {
+        return NextResponse.json(
+          { error: "Free preview limit reached! Buy credits to generate more tracks." },
+          { status: 429 }
+        );
+      }
     }
 
     // 1. Generate lyrics with Claude
@@ -64,9 +92,9 @@ export async function POST(req: NextRequest) {
     // 3. Upload to Supabase Storage
     const id = crypto.randomUUID();
 
-    // Ensure bucket exists (ignore "already exists" error)
+    // Ensure bucket exists (private for security)
     await supabaseAdmin.storage
-      .createBucket("tracks", { public: true })
+      .createBucket("tracks", { public: false })
       .catch(() => {});
 
     // Upload audio
@@ -79,12 +107,17 @@ export async function POST(req: NextRequest) {
       throw new Error(`Audio upload failed: ${audioErr.message}`);
     }
 
-    // Get public URL
-    const {
-      data: { publicUrl: audioUrl },
-    } = supabaseAdmin.storage.from("tracks").getPublicUrl(`${id}.mp3`);
+    // Get signed URL (valid for 7 days)
+    const { data: signedData, error: signError } = await supabaseAdmin.storage
+      .from("tracks")
+      .createSignedUrl(`${id}.mp3`, 7 * 24 * 60 * 60); // 7 days
 
-    // Save metadata (mark if preview or full)
+    if (signError || !signedData?.signedUrl) {
+      throw new Error("Failed to create audio URL");
+    }
+    const audioUrl = signedData.signedUrl;
+
+    // Save metadata (no userId for privacy)
     const metadata = {
       id,
       name: name.trim(),
@@ -94,8 +127,6 @@ export async function POST(req: NextRequest) {
       language: language || "en",
       lyrics,
       audioUrl,
-      isFreePreview,
-      userId,
       createdAt: new Date().toISOString(),
     };
 
@@ -118,7 +149,8 @@ export async function POST(req: NextRequest) {
       genre || "hiphop",
       roastLevel || "funny",
       language || "en",
-      isFreePreview
+      isFreePreview,
+      ip
     );
 
     console.log("Track created:", id, isFreePreview ? "(preview)" : "(paid)");

@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { polar } from "@/lib/polar";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rateLimit, getIP } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
+  // Rate limit: 10 requests per minute per IP
+  const ip = getIP(req.headers);
+  const { allowed } = rateLimit(`activate:${ip}`, 10, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const checkoutId = req.nextUrl.searchParams.get("checkout_id");
 
-  if (!checkoutId) {
+  if (!checkoutId || checkoutId.length > 100) {
     return NextResponse.json({ error: "Missing checkout_id" }, { status: 400 });
   }
 

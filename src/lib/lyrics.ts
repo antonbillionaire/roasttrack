@@ -12,28 +12,65 @@ interface LyricsRequest {
   language: string;
 }
 
-const GENRE_STYLES: Record<string, string> = {
-  hiphop: "hip-hop/rap with hard-hitting bars, clever wordplay, and a bouncy beat feel",
-  pop: "catchy pop with a memorable hook, upbeat rhythm, and sing-along chorus",
-  reggaeton: "reggaeton with Latin rhythm, dembow beat feel, and playful flow",
-  country: "country with twangy storytelling, humor, and a honky-tonk vibe",
-  rock: "punk rock with aggressive energy, power chords feel, and raw attitude",
-  edm: "EDM/electronic with a drop, synth vibes, and danceable energy",
+// Genre-specific style + syllable guidance based on typical BPM
+const GENRE_CONFIG: Record<string, { style: string; syllables: string; bpm: string }> = {
+  hiphop: {
+    style: "hip-hop/rap with hard-hitting bars, clever wordplay, and a bouncy beat feel",
+    syllables: "8-12 syllables per line (rap flow, slightly fast)",
+    bpm: "90-100 BPM",
+  },
+  pop: {
+    style: "catchy pop with a memorable hook, upbeat rhythm, and sing-along chorus",
+    syllables: "6-10 syllables per line (singable, clear phrasing)",
+    bpm: "110-120 BPM",
+  },
+  reggaeton: {
+    style: "reggaeton with Latin rhythm, dembow beat feel, and playful flow",
+    syllables: "8-12 syllables per line (rhythmic, danceable flow)",
+    bpm: "90-100 BPM",
+  },
+  country: {
+    style: "country with twangy storytelling, humor, and a honky-tonk vibe",
+    syllables: "6-10 syllables per line (conversational, storytelling pace)",
+    bpm: "100-110 BPM",
+  },
+  rock: {
+    style: "punk rock with aggressive energy, power chords feel, and raw attitude",
+    syllables: "6-10 syllables per line (punchy, shout-ready)",
+    bpm: "140-160 BPM",
+  },
+  edm: {
+    style: "EDM/electronic with a drop, synth vibes, and danceable energy",
+    syllables: "4-8 syllables per line (short, chant-like, repetitive)",
+    bpm: "125-130 BPM",
+  },
 };
 
 const ROAST_LEVELS: Record<string, string> = {
   funny:
-    "Make it HILARIOUS — pure comedy, absurd comparisons, over-the-top silly. Like a stand-up comedian roasting a friend at a birthday party. The goal is everyone laughing, nobody hurt. Think of the funniest, most ridiculous comparisons. Exaggerate everything. No actual burns, just comedy gold.",
+    "Make it HILARIOUS — pure comedy, absurd comparisons, over-the-top silly. Like a stand-up comedian roasting a friend at a birthday party. The goal is everyone laughing, nobody hurt. Exaggerate everything. No actual burns, just comedy gold.",
   hard:
-    "Friendly roast with some edge — playful teasing, gentle burns, affectionate jabs. Like friends joking around. Clever wordplay, funny comparisons, lighthearted but pointed. No harsh words or truly mean content.",
+    "Friendly roast with some edge — playful teasing, gentle burns, affectionate jabs. Like friends joking around. Clever wordplay, funny comparisons, lighthearted but pointed.",
   extreme:
     "Savage roast — clever burns, brutal honesty, comedy roast show level. Witty, cutting, no holding back. However: NO hate speech, NO slurs, NO attacks on appearance/race/gender/disability. Channel the savagery through CREATIVITY and WIT.",
 };
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-  en: "Write in English only.",
-  ru: "Write ALL lyrics in Russian (Cyrillic). The entire song must be in Russian — verses, chorus, everything. Use natural Russian slang and wordplay.",
-  es: "Write ALL lyrics in Spanish. The entire song must be in Spanish. Use natural Spanish slang and wordplay.",
+  en: `Write in English only.
+- Use simple, common words that are easy to pronounce
+- Avoid abbreviations, acronyms, or words with silent letters
+- Prefer one-word or two-syllable rhymes (e.g., "day/way", "name/shame")`,
+  ru: `Write ALL lyrics in Russian (Cyrillic). The entire song must be in Russian.
+- Use natural Russian slang and wordplay
+- Use simple words — avoid complex multi-syllable words that TTS will mispronounce
+- Prefer clear vowel endings for rhymes (e.g., "-ает/-ает", "-ой/-ой")
+- Do NOT use English words written in Cyrillic
+- Keep stress patterns natural and consistent`,
+  es: `Write ALL lyrics in Spanish. The entire song must be in Spanish.
+- Use natural Spanish slang and wordplay
+- Prefer words with clear vowel endings for clean rhymes
+- Avoid complex conjugations — keep it conversational
+- Use Rioplatense or neutral Latin American Spanish`,
 };
 
 export async function generateLyrics({
@@ -43,44 +80,67 @@ export async function generateLyrics({
   roastLevel = "funny",
   language = "en",
 }: LyricsRequest): Promise<string> {
-  const style = GENRE_STYLES[genre] || GENRE_STYLES.hiphop;
+  const config = GENRE_CONFIG[genre] || GENRE_CONFIG.hiphop;
   const levelInstructions = ROAST_LEVELS[roastLevel] || ROAST_LEVELS.funny;
   const langInstructions = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
   const factsText = facts.map((f, i) => `${i + 1}. ${f}`).join("\n");
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 400,
+    max_tokens: 500,
     messages: [
       {
         role: "user",
-        content: `Write a SHORT roast/diss track about "${name}".
+        content: `You are a songwriter for a 30-second AI-sung roast track. The AI voice sings the lyrics — you must write for SINGING, not reading.
 
-Facts about them:
+TARGET PERSON: "${name}"
+
+FACTS ABOUT THEM:
 ${factsText}
 
-Style: ${style}
+MUSIC STYLE: ${config.style} (${config.bpm})
 
-Tone: ${levelInstructions}
+ROAST TONE: ${levelInstructions}
 
-CRITICAL FORMAT RULES:
-- Write ONLY lyrics, no explanations
-- EXACTLY 2 sections: Verse and Chorus
-- Verse: EXACTLY 4 lines
-- Chorus: EXACTLY 4 lines
-- Total: 8 lines of lyrics ONLY
-- This is for a 30-second song — keep it SHORT and punchy
-- Reference the facts creatively
-- Use "${name}" at least twice
-- Make the chorus catchy and memorable
-- ${langInstructions}
+CRITICAL SONGWRITING RULES:
 
-Format:
+1. STRUCTURE — exactly 2 sections:
+   Verse (4 lines)
+   Chorus (4 lines)
+
+2. RHYTHM — every line must have ${config.syllables}. Count your syllables! Lines that are too long will sound rushed. Lines that are too short will have awkward pauses.
+
+3. RHYME SCHEME — use AABB (line 1 rhymes with line 2, line 3 rhymes with line 4). End-rhymes must be STRONG and OBVIOUS — the listener should immediately hear the rhyme.
+
+4. SINGABILITY — this will be sung by an AI voice:
+   - Use simple, common words (no jargon, no abbreviations)
+   - Avoid tongue-twisters or consonant clusters
+   - End lines on strong vowel sounds when possible
+   - Each line should be one natural breath phrase
+   - The chorus should feel like a chant people can repeat
+
+5. CONTENT:
+   - Reference the facts creatively
+   - Use "${name}" at least twice
+   - Make the chorus catchy and memorable
+   - The chorus should be the most fun part to sing along to
+
+6. LANGUAGE:
+${langInstructions}
+
+OUTPUT FORMAT — write ONLY the lyrics, nothing else:
+
 Verse
-(4 lines here)
+(line 1)
+(line 2)
+(line 3)
+(line 4)
 
 Chorus
-(4 lines here)`,
+(line 1)
+(line 2)
+(line 3)
+(line 4)`,
       },
     ],
   });

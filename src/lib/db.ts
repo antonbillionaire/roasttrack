@@ -119,7 +119,8 @@ export async function recordGeneration(
   genre: string,
   roastLevel: string,
   language: string,
-  isFreePreview: boolean
+  isFreePreview: boolean,
+  ipAddress?: string
 ) {
   await supabaseAdmin.from("generations").insert({
     user_id: userId,
@@ -129,6 +130,7 @@ export async function recordGeneration(
     roast_level: roastLevel,
     language,
     is_free_preview: isFreePreview,
+    ip_address: ipAddress || null,
   });
 }
 
@@ -144,7 +146,7 @@ export async function getUserGenerations(userId: string) {
   return data || [];
 }
 
-// Check if IP/fingerprint already used free preview (simple rate limit)
+// Count free previews by IP today (for rate limiting)
 export async function countFreePreviewsToday(ip: string): Promise<number> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -153,6 +155,7 @@ export async function countFreePreviewsToday(ip: string): Promise<number> {
     .from("generations")
     .select("*", { count: "exact", head: true })
     .eq("is_free_preview", true)
+    .eq("ip_address", ip)
     .gte("created_at", today.toISOString());
 
   return count || 0;

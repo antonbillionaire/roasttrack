@@ -88,8 +88,9 @@ export default function Home() {
         }),
       });
 
-      if (res.status === 402) {
-        setError("No credits! Buy a pack below to generate tracks.");
+      if (res.status === 402 || res.status === 429) {
+        const data = await res.json();
+        setError(data.error || "Buy credits to generate more tracks!");
         setLoading(false);
         document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
         return;
