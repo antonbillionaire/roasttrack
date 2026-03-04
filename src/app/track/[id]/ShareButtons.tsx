@@ -34,7 +34,7 @@ export default function ShareButtons({
   };
 
   const shareOnX = () => {
-    const text = `${name} just got ROASTED\nListen to their AI diss track:`;
+    const text = `${name} just got ROASTED 🔥🎤\nListen to their AI diss track:`;
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`;
     window.open(url, "_blank");
   };
@@ -55,22 +55,22 @@ export default function ShareButtons({
     <div className="flex gap-3">
       <button
         onClick={copyLink}
-        className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+        className="flex-1 py-3 glass glass-hover rounded-xl font-medium text-sm cursor-pointer"
       >
-        {copied ? "Copied!" : "Copy Link"}
+        {copied ? "Copied! ✓" : "📋 Copy Link"}
       </button>
       <button
         onClick={shareOnX}
-        className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+        className="flex-1 py-3 glass glass-hover rounded-xl font-medium text-sm cursor-pointer"
       >
-        Share on X
+        𝕏 Share
       </button>
       {canShare && (
         <button
           onClick={shareNative}
-          className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          className="flex-1 py-3 glass glass-hover rounded-xl font-medium text-sm cursor-pointer"
         >
-          Share
+          📤 Share
         </button>
       )}
     </div>

@@ -8,7 +8,7 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, facts, genre } = body;
+    const { name, facts, genre, roastLevel, language } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
       name: name.trim(),
       facts: validFacts.map((f: string) => f.trim()),
       genre: genre || "hiphop",
+      roastLevel: roastLevel || "hard",
+      language: language || "en",
     });
     console.log("Lyrics generated successfully");
 
@@ -64,6 +66,8 @@ export async function POST(req: NextRequest) {
       name: name.trim(),
       facts: validFacts,
       genre: genre || "hiphop",
+      roastLevel: roastLevel || "hard",
+      language: language || "en",
       lyrics,
       audioUrl,
       createdAt: new Date().toISOString(),

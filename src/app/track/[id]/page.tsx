@@ -8,10 +8,18 @@ interface TrackData {
   name: string;
   facts: string[];
   genre: string;
+  roastLevel?: string;
+  language?: string;
   lyrics: string;
   audioUrl: string;
   createdAt: string;
 }
+
+const ROAST_LEVEL_LABELS: Record<string, { label: string; emoji: string }> = {
+  light: { label: "Light", emoji: "😏" },
+  hard: { label: "Hard", emoji: "😈" },
+  extreme: { label: "Extreme", emoji: "💀" },
+};
 
 async function getTrack(id: string): Promise<TrackData | null> {
   try {
@@ -50,13 +58,13 @@ export async function generateMetadata(
   };
 }
 
-const GENRE_LABELS: Record<string, { label: string; emoji: string }> = {
-  hiphop: { label: "Hip-Hop", emoji: "🎤" },
-  pop: { label: "Pop", emoji: "🎵" },
-  reggaeton: { label: "Reggaeton", emoji: "🔥" },
-  country: { label: "Country", emoji: "🤠" },
-  rock: { label: "Rock", emoji: "🎸" },
-  edm: { label: "EDM", emoji: "🎧" },
+const GENRE_LABELS: Record<string, { label: string; emoji: string; gradient: string }> = {
+  hiphop: { label: "Hip-Hop", emoji: "🎤", gradient: "from-purple-500/30 to-blue-500/30" },
+  pop: { label: "Pop", emoji: "🎵", gradient: "from-pink-500/30 to-rose-500/30" },
+  reggaeton: { label: "Reggaeton", emoji: "🌴", gradient: "from-yellow-500/30 to-orange-500/30" },
+  country: { label: "Country", emoji: "🤠", gradient: "from-amber-500/30 to-yellow-500/30" },
+  rock: { label: "Rock", emoji: "🎸", gradient: "from-red-500/30 to-orange-500/30" },
+  edm: { label: "EDM", emoji: "🎧", gradient: "from-cyan-500/30 to-blue-500/30" },
 };
 
 export default async function TrackPage(
@@ -67,14 +75,15 @@ export default async function TrackPage(
 
   if (!track) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <h1 className="text-3xl font-bold mb-4">Track Not Found</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-radial">
+        <div className="text-6xl mb-6">😵</div>
+        <h1 className="text-3xl font-black mb-4">Track Not Found</h1>
         <p className="text-zinc-400 mb-6">
           This roast doesn&apos;t exist or has been removed.
         </p>
         <Link
           href="/"
-          className="px-6 py-3 bg-red-500 hover:bg-red-600 rounded-xl font-bold transition-colors"
+          className="gradient-btn px-8 py-3 rounded-xl font-bold"
         >
           Create a Roast
         </Link>
@@ -85,35 +94,55 @@ export default async function TrackPage(
   const genreInfo = GENRE_LABELS[track.genre] || {
     label: track.genre,
     emoji: "🎵",
+    gradient: "from-zinc-500/30 to-zinc-600/30",
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-12">
+    <div className="min-h-screen flex flex-col items-center px-4 py-12 bg-gradient-radial relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-16 left-8 text-3xl opacity-15 float-slow select-none pointer-events-none">🔥</div>
+      <div className="absolute top-32 right-10 text-2xl opacity-10 float-medium select-none pointer-events-none">🎵</div>
+      <div className="absolute bottom-40 left-12 text-2xl opacity-10 float-fast select-none pointer-events-none">💀</div>
+
       {/* Header */}
-      <Link href="/" className="text-2xl font-bold tracking-tight mb-8">
-        <span className="text-red-500">Roast</span>Track
+      <Link href="/" className="text-2xl font-black tracking-tight mb-8 animate-slide-up">
+        <span className="gradient-text">Roast</span>
+        <span className="text-white">Track</span>
       </Link>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md animate-slide-up" style={{ animationDelay: "0.1s" }}>
         {/* Track Card */}
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 mb-6">
-          <div className="text-center mb-6">
-            <div className="text-5xl mb-3">🔥</div>
-            <h1 className="text-2xl font-bold mb-2">
-              {track.name}&apos;s Roast
-            </h1>
-            <span className="inline-block px-3 py-1 bg-zinc-800 rounded-full text-sm text-zinc-400">
-              {genreInfo.emoji} {genreInfo.label}
-            </span>
-          </div>
+        <div className={`glass rounded-2xl p-6 mb-6 relative overflow-hidden`}>
+          {/* Genre gradient overlay */}
+          <div className={`absolute inset-0 bg-gradient-to-br ${genreInfo.gradient} opacity-50`} />
 
-          <TrackPlayer audioUrl={track.audioUrl} />
+          <div className="relative z-10">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-3 fire-bounce">🔥</div>
+              <h1 className="text-3xl font-black mb-2">
+                {track.name}&apos;s Roast
+              </h1>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur rounded-full text-sm text-zinc-300 font-medium">
+                  {genreInfo.emoji} {genreInfo.label}
+                </span>
+                {track.roastLevel && ROAST_LEVEL_LABELS[track.roastLevel] && (
+                  <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur rounded-full text-sm text-zinc-300 font-medium">
+                    {ROAST_LEVEL_LABELS[track.roastLevel].emoji} {ROAST_LEVEL_LABELS[track.roastLevel].label}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <TrackPlayer audioUrl={track.audioUrl} />
+          </div>
         </div>
 
         {/* Lyrics */}
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 mb-6">
-          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-4">
-            Lyrics
+        <div className="glass rounded-2xl p-6 mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span>Lyrics</span>
+            <span className="text-base">📝</span>
           </h2>
           <div className="space-y-0.5">
             {track.lyrics.split("\n").map((line, i) => {
@@ -129,7 +158,7 @@ export default async function TrackPage(
                 return (
                   <p
                     key={i}
-                    className="text-red-400 font-bold mt-4 mb-1 text-xs uppercase tracking-widest"
+                    className="gradient-text font-bold mt-5 mb-1.5 text-xs uppercase tracking-widest"
                   >
                     {trimmed.replace(/[\[\]]/g, "")}
                   </p>
@@ -146,19 +175,22 @@ export default async function TrackPage(
         </div>
 
         {/* Share */}
-        <ShareButtons name={track.name} trackId={track.id} />
+        <div className="animate-slide-up" style={{ animationDelay: "0.3s" }}>
+          <ShareButtons name={track.name} trackId={track.id} />
+        </div>
 
         {/* Create Another */}
         <Link
           href="/"
-          className="block w-full text-center py-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-lg transition-colors mt-4"
+          className="block w-full text-center py-4 gradient-btn rounded-2xl font-bold text-lg mt-4 animate-slide-up"
+          style={{ animationDelay: "0.35s" }}
         >
           🔥 Roast Someone Else
         </Link>
       </div>
 
-      <p className="text-zinc-700 text-xs mt-12">
-        Made with RoastTrack — AI Diss Track Generator
+      <p className="text-zinc-600 text-xs mt-12">
+        Made with RoastTrack — AI Diss Track Generator 💀
       </p>
     </div>
   );
