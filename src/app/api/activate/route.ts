@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
 
   try {
     // Fetch checkout details from Polar to get customer email
-    const checkout = await polar.checkouts.get(checkoutId);
-    const email = checkout.customer?.email || checkout.customerEmail;
+    const checkout = await polar.checkouts.get({ id: checkoutId });
+    const email = checkout.customerEmail;
 
     if (!email) {
       return NextResponse.json(
