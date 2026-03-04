@@ -20,7 +20,7 @@ export const PACKS = {
   },
   "5": {
     credits: 5,
-    priceCents: 999,
+    priceCents: 899,
     label: "5 Tracks",
     polarProductId: process.env.POLAR_PRODUCT_5_ID!,
   },

@@ -27,8 +27,8 @@ const LANGUAGES = [
 const PACKS = [
   { id: "1", credits: 1, price: "$2.50", perTrack: "$2.50", label: "Try it" },
   { id: "3", credits: 3, price: "$5.99", perTrack: "$2.00", label: "Popular" },
-  { id: "5", credits: 5, price: "$9.99", perTrack: "$2.00", label: "Best Value", highlight: true },
-  { id: "10", credits: 10, price: "$14.99", perTrack: "$1.50", label: "Party Pack" },
+  { id: "5", credits: 5, price: "$8.99", perTrack: "$1.80", label: "Save 28%" },
+  { id: "10", credits: 10, price: "$14.99", perTrack: "$1.50", label: "Best Value", highlight: true },
 ];
 
 export default function Home() {
@@ -368,6 +368,12 @@ export default function Home() {
             </button>
           ))}
         </div>
+
+        {error && (
+          <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-xl p-3 mt-4">
+            {error}
+          </div>
+        )}
 
         <p className="text-center text-xs text-gray-400 mt-4">
           Secure payment via Polar. No subscription — buy once, use anytime.
