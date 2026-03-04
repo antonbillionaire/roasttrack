@@ -44,13 +44,12 @@ const GENRE_STYLES: Record<string, { positive: string[]; negative: string[] }> =
 
 function parseLyricsToSections(lyrics: string): { name: string; lines: string[] }[] {
   const sections: { name: string; lines: string[] }[] = [];
-  let currentSection = { name: "Verse 1", lines: [] as string[] };
+  let currentSection = { name: "Verse", lines: [] as string[] };
 
   for (const line of lyrics.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Check for section headers like "Verse 1", "Chorus", "[Verse 1]", etc.
     const sectionMatch = trimmed.match(/^\[?\s*(Verse\s*\d*|Chorus|Bridge|Outro|Intro|Hook|Pre-Chorus)\s*\]?\s*$/i);
     if (sectionMatch) {
       if (currentSection.lines.length > 0) {
@@ -58,7 +57,6 @@ function parseLyricsToSections(lyrics: string): { name: string; lines: string[] 
       }
       currentSection = { name: sectionMatch[1], lines: [] };
     } else {
-      // Remove parenthetical stage directions like (Ah!), (Haha!)
       const cleanLine = trimmed.replace(/\([^)]*\)/g, "").trim();
       if (cleanLine) {
         currentSection.lines.push(cleanLine);
@@ -77,15 +75,18 @@ export async function generateMusic(lyrics: string, genre: string): Promise<Buff
   const styles = GENRE_STYLES[genre] || GENRE_STYLES.hiphop;
   const parsedSections = parseLyricsToSections(lyrics);
 
-  // Build composition plan with sections
+  // Target: ~30 sec total. Split evenly between sections.
+  const totalDurationMs = 30000;
+  const durationPerSection = Math.floor(totalDurationMs / Math.max(parsedSections.length, 1));
+
   const sections: MusicSection[] = parsedSections.map((s) => ({
     section_name: s.name,
     positive_local_styles: s.name.toLowerCase().includes("chorus")
       ? ["catchy", "energetic", "sing-along"]
       : ["rhythmic", "flowing"],
     negative_local_styles: [],
-    duration_ms: Math.min(Math.max(s.lines.length * 4000, 8000), 30000),
-    lines: s.lines.slice(0, 8), // Max 8 lines per section
+    duration_ms: Math.min(durationPerSection, 20000),
+    lines: s.lines.slice(0, 4), // Max 4 lines per section for 30-sec format
   }));
 
   const compositionPlan: CompositionPlan = {

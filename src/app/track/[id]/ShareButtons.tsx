@@ -55,20 +55,20 @@ export default function ShareButtons({
     <div className="flex gap-3">
       <button
         onClick={copyLink}
-        className="flex-1 py-3 glass glass-hover rounded-xl font-medium text-sm cursor-pointer"
+        className="flex-1 py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
       >
         {copied ? "Copied! ✓" : "📋 Copy Link"}
       </button>
       <button
         onClick={shareOnX}
-        className="flex-1 py-3 glass glass-hover rounded-xl font-medium text-sm cursor-pointer"
+        className="flex-1 py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
       >
         𝕏 Share
       </button>
       {canShare && (
         <button
           onClick={shareNative}
-          className="flex-1 py-3 glass glass-hover rounded-xl font-medium text-sm cursor-pointer"
+          className="flex-1 py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
         >
           📤 Share
         </button>

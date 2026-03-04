@@ -62,7 +62,7 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
       {/* Play/Pause Button */}
       <button
         onClick={togglePlay}
-        className={`w-18 h-18 mx-auto mb-5 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+        className={`mx-auto mb-5 flex items-center justify-center rounded-full transition-all cursor-pointer ${
           playing
             ? "gradient-btn animate-pulse-glow scale-110"
             : "gradient-btn hover:scale-110 active:scale-95"
@@ -99,11 +99,11 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
 
       {/* Progress Bar */}
       <div className="flex items-center gap-3">
-        <span className="text-xs text-zinc-400 w-10 text-right font-mono">
+        <span className="text-xs text-white/50 w-10 text-right font-mono">
           {formatTime(currentTime)}
         </span>
         <div
-          className="flex-1 h-2 bg-white/10 rounded-full cursor-pointer group relative"
+          className="flex-1 h-2 bg-white/15 rounded-full cursor-pointer group relative"
           onClick={seek}
         >
           <div
@@ -113,13 +113,12 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
               background: "linear-gradient(90deg, #ff6b35, #f7418f)",
             }}
           />
-          {/* Seek dot */}
           <div
             className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ left: `calc(${progress}% - 6px)` }}
           />
         </div>
-        <span className="text-xs text-zinc-400 w-10 font-mono">
+        <span className="text-xs text-white/50 w-10 font-mono">
           {formatTime(duration)}
         </span>
       </div>

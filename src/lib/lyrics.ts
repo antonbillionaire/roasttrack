@@ -22,12 +22,12 @@ const GENRE_STYLES: Record<string, string> = {
 };
 
 const ROAST_LEVELS: Record<string, string> = {
-  light:
-    "Keep it light and playful — friendly teasing, gentle jokes, the kind of roast you'd do at a birthday party. Think wholesome humor, silly comparisons, and affectionate jabs. No harsh words.",
+  funny:
+    "Make it HILARIOUS — pure comedy, absurd comparisons, over-the-top silly. Like a stand-up comedian roasting a friend at a birthday party. The goal is everyone laughing, nobody hurt. Think of the funniest, most ridiculous comparisons. Exaggerate everything. No actual burns, just comedy gold.",
   hard:
-    "Go hard — savage roast with clever burns, brutal honesty, and no holding back. Think comedy roast show level. Witty, cutting, but still clever rather than crude. No profanity or slurs.",
+    "Friendly roast with some edge — playful teasing, gentle burns, affectionate jabs. Like friends joking around. Clever wordplay, funny comparisons, lighthearted but pointed. No harsh words or truly mean content.",
   extreme:
-    "Maximum brutality — absolutely devastating bars, career-ending level roast. The most creative and savage wordplay possible. Scorched earth. However: NO hate speech, NO slurs, NO truly personal attacks on appearance/race/gender/disability. Channel the savagery through CREATIVITY and WIT, not through crossing ethical lines.",
+    "Savage roast — clever burns, brutal honesty, comedy roast show level. Witty, cutting, no holding back. However: NO hate speech, NO slurs, NO attacks on appearance/race/gender/disability. Channel the savagery through CREATIVITY and WIT.",
 };
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
@@ -40,37 +40,47 @@ export async function generateLyrics({
   name,
   facts,
   genre,
-  roastLevel = "hard",
+  roastLevel = "funny",
   language = "en",
 }: LyricsRequest): Promise<string> {
   const style = GENRE_STYLES[genre] || GENRE_STYLES.hiphop;
-  const levelInstructions = ROAST_LEVELS[roastLevel] || ROAST_LEVELS.hard;
+  const levelInstructions = ROAST_LEVELS[roastLevel] || ROAST_LEVELS.funny;
   const langInstructions = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
   const factsText = facts.map((f, i) => `${i + 1}. ${f}`).join("\n");
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 600,
+    max_tokens: 400,
     messages: [
       {
         role: "user",
-        content: `Write a roast/diss track about a person named "${name}".
+        content: `Write a SHORT roast/diss track about "${name}".
 
-Here are facts about them:
+Facts about them:
 ${factsText}
 
 Style: ${style}
 
-Roast level: ${levelInstructions}
+Tone: ${levelInstructions}
 
-Rules:
-- Write ONLY the song lyrics, nothing else
-- Include a Verse 1, Chorus, and Verse 2
-- Reference ALL the facts provided in creative ways
-- Use the person's name at least 2-3 times
-- Each section should be 4-8 lines
-- Make the chorus catchy and repeatable
-- ${langInstructions}`,
+CRITICAL FORMAT RULES:
+- Write ONLY lyrics, no explanations
+- EXACTLY 2 sections: Verse and Chorus
+- Verse: EXACTLY 4 lines
+- Chorus: EXACTLY 4 lines
+- Total: 8 lines of lyrics ONLY
+- This is for a 30-second song — keep it SHORT and punchy
+- Reference the facts creatively
+- Use "${name}" at least twice
+- Make the chorus catchy and memorable
+- ${langInstructions}
+
+Format:
+Verse
+(4 lines here)
+
+Chorus
+(4 lines here)`,
       },
     ],
   });
