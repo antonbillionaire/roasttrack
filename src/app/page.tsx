@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const GENRES = [
@@ -24,6 +24,13 @@ const LANGUAGES = [
   { id: "es", label: "Español", flag: "🇪🇸" },
 ];
 
+const PACKS = [
+  { id: "1", credits: 1, price: "$2.50", perTrack: "$2.50", label: "Try it" },
+  { id: "3", credits: 3, price: "$5.99", perTrack: "$2.00", label: "Popular" },
+  { id: "5", credits: 5, price: "$9.99", perTrack: "$2.00", label: "Best Value", highlight: true },
+  { id: "10", credits: 10, price: "$14.99", perTrack: "$1.50", label: "Party Pack" },
+];
+
 export default function Home() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -33,6 +40,24 @@ export default function Home() {
   const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [credits, setCredits] = useState<number | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [buyingPack, setBuyingPack] = useState<string | null>(null);
+
+  // Load saved token
+  useEffect(() => {
+    const saved = localStorage.getItem("rt_token");
+    if (saved) {
+      setAccessToken(saved);
+      fetch(`/api/me?token=${saved}`)
+        .then((res) => res.ok ? res.json() : null)
+        .then((data) => {
+          if (data) setCredits(data.credits);
+          else localStorage.removeItem("rt_token");
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const updateFact = (index: number, value: string) => {
     const newFacts = [...facts];
@@ -59,8 +84,16 @@ export default function Home() {
           genre,
           roastLevel,
           language,
+          accessToken,
         }),
       });
+
+      if (res.status === 402) {
+        setError("No credits! Buy a pack below to generate tracks.");
+        setLoading(false);
+        document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
 
       if (!res.ok) {
         const data = await res.json();
@@ -68,6 +101,7 @@ export default function Home() {
       }
 
       const data = await res.json();
+      if (credits !== null) setCredits(credits - 1);
       router.push(`/track/${data.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -75,13 +109,43 @@ export default function Home() {
     }
   };
 
+  const handleBuyPack = async (packId: string) => {
+    setBuyingPack(packId);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packType: packId }),
+      });
+
+      if (!res.ok) throw new Error("Failed to create checkout");
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setError("Payment failed to start. Please try again.");
+    } finally {
+      setBuyingPack(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-warm relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center px-4 py-12 bg-warm relative overflow-hidden">
       {/* Floating decorative emojis */}
       <div className="absolute top-20 left-10 text-4xl opacity-30 float-slow select-none pointer-events-none">🔥</div>
       <div className="absolute top-40 right-12 text-3xl opacity-20 float-medium select-none pointer-events-none">🎤</div>
       <div className="absolute bottom-32 left-16 text-3xl opacity-20 float-fast select-none pointer-events-none">🎵</div>
       <div className="absolute bottom-20 right-20 text-4xl opacity-30 float-slow select-none pointer-events-none" style={{ animationDelay: "1s" }}>💀</div>
+
+      {/* Credits badge (if logged in) */}
+      {credits !== null && (
+        <div className="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg border border-gray-200">
+          <span className="text-sm font-bold gradient-text">{credits}</span>
+          <span className="text-xs text-gray-500 ml-1">credits</span>
+        </div>
+      )}
 
       {/* Hero */}
       <div className="text-center mb-10 animate-slide-up">
@@ -252,11 +316,63 @@ export default function Home() {
               </span>
               Cooking your roast...
             </span>
+          ) : credits !== null && credits > 0 ? (
+            `🔥 Generate Diss Track (${credits} left)`
           ) : (
-            "🔥 Generate Diss Track"
+            "🔥 Generate Free Preview"
           )}
         </button>
       </form>
+
+      {/* Pricing Section */}
+      <div id="pricing" className="w-full max-w-md mt-16 animate-slide-up" style={{ animationDelay: "0.25s" }}>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black mb-2">Get More Roasts</h2>
+          <p className="text-gray-500">
+            Buy credits to generate full tracks with download & sharing
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {PACKS.map((pack) => (
+            <button
+              key={pack.id}
+              onClick={() => handleBuyPack(pack.id)}
+              disabled={buyingPack !== null}
+              className={`relative card rounded-2xl p-5 text-center cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                pack.highlight
+                  ? "ring-2 ring-pink-400 shadow-lg"
+                  : ""
+              }`}
+            >
+              {pack.highlight && (
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">
+                  BEST VALUE
+                </span>
+              )}
+              <div className="text-3xl font-black gradient-text mb-1">
+                {pack.credits}
+              </div>
+              <div className="text-xs text-gray-500 mb-3">
+                {pack.credits === 1 ? "track" : "tracks"}
+              </div>
+              <div className="text-xl font-black mb-1">{pack.price}</div>
+              <div className="text-[10px] text-gray-400">
+                {pack.perTrack}/track
+              </div>
+              {buyingPack === pack.id && (
+                <div className="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center">
+                  <span className="text-sm font-bold text-gray-500">Loading...</span>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-center text-xs text-gray-400 mt-4">
+          Secure payment via Polar. No subscription — buy once, use anytime.
+        </p>
+      </div>
 
       {/* Footer */}
       <p className="text-gray-400 text-xs mt-12 animate-slide-up" style={{ animationDelay: "0.3s" }}>

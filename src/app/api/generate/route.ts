@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateLyrics } from "@/lib/lyrics";
 import { generateMusic } from "@/lib/music";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getUserByToken, deductCredit, recordGeneration } from "@/lib/db";
 
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, facts, genre, roastLevel, language } = body;
+    const { name, facts, genre, roastLevel, language, accessToken } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -21,13 +22,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least one fact is required" }, { status: 400 });
     }
 
+    // Check credits: if accessToken provided, deduct credit; otherwise free preview
+    let userId: string | null = null;
+    let isFreePreview = true;
+
+    if (accessToken) {
+      const user = await getUserByToken(accessToken);
+      if (!user) {
+        return NextResponse.json({ error: "Invalid access token" }, { status: 401 });
+      }
+      if (user.credits_remaining < 1) {
+        return NextResponse.json(
+          { error: "No credits remaining. Buy a pack to generate more tracks!" },
+          { status: 402 }
+        );
+      }
+      const deducted = await deductCredit(user.id);
+      if (!deducted) {
+        return NextResponse.json({ error: "Failed to deduct credit" }, { status: 402 });
+      }
+      userId = user.id;
+      isFreePreview = false;
+    }
+
     // 1. Generate lyrics with Claude
     console.log("Generating lyrics...");
     const lyrics = await generateLyrics({
       name: name.trim(),
       facts: validFacts.map((f: string) => f.trim()),
       genre: genre || "hiphop",
-      roastLevel: roastLevel || "hard",
+      roastLevel: roastLevel || "funny",
       language: language || "en",
     });
     console.log("Lyrics generated successfully");
@@ -60,16 +84,18 @@ export async function POST(req: NextRequest) {
       data: { publicUrl: audioUrl },
     } = supabaseAdmin.storage.from("tracks").getPublicUrl(`${id}.mp3`);
 
-    // Save metadata
+    // Save metadata (mark if preview or full)
     const metadata = {
       id,
       name: name.trim(),
       facts: validFacts,
       genre: genre || "hiphop",
-      roastLevel: roastLevel || "hard",
+      roastLevel: roastLevel || "funny",
       language: language || "en",
       lyrics,
       audioUrl,
+      isFreePreview,
+      userId,
       createdAt: new Date().toISOString(),
     };
 
@@ -84,8 +110,19 @@ export async function POST(req: NextRequest) {
       throw new Error(`Metadata upload failed: ${metaErr.message}`);
     }
 
-    console.log("Track created:", id);
-    return NextResponse.json({ id });
+    // Record generation in DB
+    await recordGeneration(
+      userId,
+      id,
+      name.trim(),
+      genre || "hiphop",
+      roastLevel || "funny",
+      language || "en",
+      isFreePreview
+    );
+
+    console.log("Track created:", id, isFreePreview ? "(preview)" : "(paid)");
+    return NextResponse.json({ id, isFreePreview });
   } catch (error) {
     console.error("Generation error:", error);
     return NextResponse.json(

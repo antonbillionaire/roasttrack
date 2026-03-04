@@ -23,6 +23,8 @@ export default function ShareButtons({
     return `/track/${trackId}`;
   };
 
+  const shareText = `${name} just got ROASTED! Listen to their AI diss track`;
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(getShareUrl());
@@ -34,8 +36,17 @@ export default function ShareButtons({
   };
 
   const shareOnX = () => {
-    const text = `${name} just got ROASTED 🔥🎤\nListen to their AI diss track:`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(getShareUrl())}`;
+    window.open(url, "_blank");
+  };
+
+  const shareOnWhatsApp = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${getShareUrl()}`)}`;
+    window.open(url, "_blank");
+  };
+
+  const shareOnTelegram = () => {
+    const url = `https://t.me/share/url?url=${encodeURIComponent(getShareUrl())}&text=${encodeURIComponent(shareText)}`;
     window.open(url, "_blank");
   };
 
@@ -43,7 +54,7 @@ export default function ShareButtons({
     try {
       await navigator.share({
         title: `${name}'s Roast - RoastTrack`,
-        text: `${name} just got ROASTED! Listen to their AI diss track`,
+        text: shareText,
         url: getShareUrl(),
       });
     } catch {
@@ -52,25 +63,39 @@ export default function ShareButtons({
   };
 
   return (
-    <div className="flex gap-3">
-      <button
-        onClick={copyLink}
-        className="flex-1 py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
-      >
-        {copied ? "Copied! ✓" : "📋 Copy Link"}
-      </button>
-      <button
-        onClick={shareOnX}
-        className="flex-1 py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
-      >
-        𝕏 Share
-      </button>
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={shareOnWhatsApp}
+          className="py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-green-600 hover:border-green-200 transition-colors"
+        >
+          WhatsApp
+        </button>
+        <button
+          onClick={shareOnTelegram}
+          className="py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-blue-500 hover:border-blue-200 transition-colors"
+        >
+          Telegram
+        </button>
+        <button
+          onClick={shareOnX}
+          className="py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          Share on X
+        </button>
+        <button
+          onClick={copyLink}
+          className="py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          {copied ? "Copied!" : "Copy Link"}
+        </button>
+      </div>
       {canShare && (
         <button
           onClick={shareNative}
-          className="flex-1 py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
+          className="w-full py-3 card rounded-xl font-medium text-sm cursor-pointer text-gray-600 hover:text-gray-800"
         >
-          📤 Share
+          More sharing options...
         </button>
       )}
     </div>
