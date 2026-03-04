@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import RestoreCredits from "@/components/RestoreCredits";
 
 const GENRES = [
   { id: "hiphop", label: "Hip-Hop", emoji: "🎤", bg: "bg-purple-100 border-purple-300 text-purple-700" },
@@ -379,6 +380,13 @@ export default function Home() {
         <p className="text-center text-xs text-gray-400 mt-4">
           Secure payment via Polar. No subscription — buy once, use anytime.
         </p>
+
+        {/* Restore credits (only when not logged in) */}
+        {credits === null && (
+          <div className="mt-6">
+            <RestoreCredits />
+          </div>
+        )}
       </div>
 
       {/* Footer */}

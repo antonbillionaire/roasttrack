@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 import TrackPlayer from "./TrackPlayer";
 import ShareButtons from "./ShareButtons";
+import UnlockButton from "./UnlockButton";
+import DownloadButton from "./DownloadButton";
 
 interface TrackData {
   id: string;
@@ -12,6 +14,7 @@ interface TrackData {
   language?: string;
   lyrics: string;
   audioUrl: string;
+  isFreePreview?: boolean;
   createdAt: string;
 }
 
@@ -119,8 +122,19 @@ export default async function TrackPage(
             </div>
           </div>
 
-          <TrackPlayer audioUrl={track.audioUrl} />
+          <TrackPlayer audioUrl={track.audioUrl} isFreePreview={track.isFreePreview ?? false} />
         </div>
+
+        {/* Unlock / Download */}
+        {track.isFreePreview ? (
+          <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+            <UnlockButton trackId={track.id} />
+          </div>
+        ) : (
+          <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+            <DownloadButton audioUrl={track.audioUrl} name={track.name} />
+          </div>
+        )}
 
         {/* Lyrics */}
         <div className="card rounded-2xl p-6 mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>

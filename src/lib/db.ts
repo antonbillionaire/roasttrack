@@ -33,6 +33,17 @@ export async function getOrCreateUser(email: string): Promise<User> {
   return created as User;
 }
 
+// Get user by email (for restore across devices)
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const { data } = await supabaseAdmin
+    .from("users")
+    .select("*")
+    .eq("email", email.toLowerCase().trim())
+    .single();
+
+  return data as User | null;
+}
+
 // Get user by access token (for /my page)
 export async function getUserByToken(token: string): Promise<User | null> {
   const { data } = await supabaseAdmin

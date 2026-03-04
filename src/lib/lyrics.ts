@@ -87,11 +87,11 @@ export async function generateLyrics({
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 500,
+    max_tokens: 1000,
     messages: [
       {
         role: "user",
-        content: `You are a songwriter for a 30-second AI-sung roast track. The AI voice sings the lyrics — you must write for SINGING, not reading.
+        content: `You are a songwriter for a 1-minute AI-sung roast track. The AI voice sings the lyrics — you must write for SINGING, not reading.
 
 TARGET PERSON: "${name}"
 
@@ -104,9 +104,13 @@ ROAST TONE: ${levelInstructions}
 
 CRITICAL SONGWRITING RULES:
 
-1. STRUCTURE — exactly 2 sections:
-   Verse (4 lines)
+1. STRUCTURE — exactly 4 sections (for a ~1 minute song):
+   Verse 1 (4 lines)
    Chorus (4 lines)
+   Verse 2 (4 lines)
+   Chorus (repeat the EXACT same 4 lines from the first Chorus)
+
+   You write 12 UNIQUE lines total. The second Chorus is a copy of the first.
 
 2. RHYTHM — every line must have ${config.syllables}. Count your syllables! Lines that are too long will sound rushed. Lines that are too short will have awkward pauses.
 
@@ -120,17 +124,31 @@ CRITICAL SONGWRITING RULES:
    - The chorus should feel like a chant people can repeat
 
 5. CONTENT:
-   - Reference the facts creatively
-   - Use "${name}" at least twice
-   - Make the chorus catchy and memorable
-   - The chorus should be the most fun part to sing along to
+   - Verse 1: introduce ${name}, set the scene, reference 1-2 facts
+   - Chorus: the catchy hook everyone remembers — use "${name}" here
+   - Verse 2: dig deeper, reference remaining facts, build on the roast
+   - Reference the facts creatively across both verses
+   - Use "${name}" at least 3 times across the whole song
+   - Make the chorus the most fun part to sing along to
 
 6. LANGUAGE:
 ${langInstructions}
 
 OUTPUT FORMAT — write ONLY the lyrics, nothing else:
 
-Verse
+Verse 1
+(line 1)
+(line 2)
+(line 3)
+(line 4)
+
+Chorus
+(line 1)
+(line 2)
+(line 3)
+(line 4)
+
+Verse 2
 (line 1)
 (line 2)
 (line 3)

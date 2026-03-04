@@ -10,7 +10,7 @@ const MAX_NAME_LENGTH = 50;
 const MAX_FACT_LENGTH = 150;
 const MAX_FACTS = 5;
 
-export const maxDuration = 60;
+export const maxDuration = 180;
 
 export async function POST(req: NextRequest) {
   try {
@@ -92,9 +92,9 @@ export async function POST(req: NextRequest) {
     // 3. Upload to Supabase Storage
     const id = crypto.randomUUID();
 
-    // Ensure bucket exists (private for security)
+    // Ensure bucket exists (public for permanent share links)
     await supabaseAdmin.storage
-      .createBucket("tracks", { public: false })
+      .createBucket("tracks", { public: true })
       .catch(() => {});
 
     // Upload audio
@@ -107,15 +107,12 @@ export async function POST(req: NextRequest) {
       throw new Error(`Audio upload failed: ${audioErr.message}`);
     }
 
-    // Get signed URL (valid for 7 days)
-    const { data: signedData, error: signError } = await supabaseAdmin.storage
+    // Get public URL (permanent, no expiry)
+    const { data: publicData } = supabaseAdmin.storage
       .from("tracks")
-      .createSignedUrl(`${id}.mp3`, 7 * 24 * 60 * 60); // 7 days
+      .getPublicUrl(`${id}.mp3`);
 
-    if (signError || !signedData?.signedUrl) {
-      throw new Error("Failed to create audio URL");
-    }
-    const audioUrl = signedData.signedUrl;
+    const audioUrl = publicData.publicUrl;
 
     // Save metadata (no userId for privacy)
     const metadata = {
@@ -127,6 +124,7 @@ export async function POST(req: NextRequest) {
       language: language || "en",
       lyrics,
       audioUrl,
+      isFreePreview,
       createdAt: new Date().toISOString(),
     };
 

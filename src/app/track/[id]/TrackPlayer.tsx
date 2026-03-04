@@ -1,35 +1,71 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
-export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
+const PREVIEW_LIMIT = 15; // seconds
+const FADE_START = 13; // start fading at 13s, fully muted by 15s
+
+interface TrackPlayerProps {
+  audioUrl: string;
+  isFreePreview: boolean;
+}
+
+export default function TrackPlayer({ audioUrl, isFreePreview }: TrackPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [previewEnded, setPreviewEnded] = useState(false);
+
+  const handleTimeUpdate = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setCurrentTime(audio.currentTime);
+
+    if (isFreePreview && audio.currentTime >= FADE_START) {
+      // Fade out volume between FADE_START and PREVIEW_LIMIT
+      const fadeProgress = (audio.currentTime - FADE_START) / (PREVIEW_LIMIT - FADE_START);
+      audio.volume = Math.max(0, 1 - fadeProgress);
+
+      if (audio.currentTime >= PREVIEW_LIMIT) {
+        audio.pause();
+        audio.volume = 1;
+        setPlaying(false);
+        setPreviewEnded(true);
+      }
+    }
+  }, [isFreePreview]);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoadedMetadata = () => setDuration(audio.duration);
     const onEnded = () => setPlaying(false);
 
-    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("loadedmetadata", onLoadedMetadata);
     audio.addEventListener("ended", onEnded);
 
     return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("loadedmetadata", onLoadedMetadata);
       audio.removeEventListener("ended", onEnded);
     };
-  }, []);
+  }, [handleTimeUpdate]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
+
+    if (isFreePreview && previewEnded) {
+      // Restart from beginning for preview
+      audio.currentTime = 0;
+      audio.volume = 1;
+      setPreviewEnded(false);
+    }
+
     if (playing) {
       audio.pause();
     } else {
@@ -43,7 +79,16 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
     if (!audio || !duration) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    audio.currentTime = percent * duration;
+    const targetTime = percent * displayDuration;
+
+    // For previews, don't allow seeking past limit
+    if (isFreePreview && targetTime >= PREVIEW_LIMIT) return;
+
+    audio.currentTime = targetTime;
+    if (previewEnded) {
+      setPreviewEnded(false);
+      audio.volume = 1;
+    }
   };
 
   const formatTime = (s: number) => {
@@ -53,7 +98,10 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  // For free previews, show preview limit as duration
+  const displayDuration = isFreePreview ? Math.min(duration, PREVIEW_LIMIT) : duration;
+  const displayTime = isFreePreview ? Math.min(currentTime, PREVIEW_LIMIT) : currentTime;
+  const progress = displayDuration > 0 ? (displayTime / displayDuration) * 100 : 0;
 
   return (
     <div>
@@ -97,10 +145,19 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
         </div>
       )}
 
+      {/* Preview ended overlay */}
+      {isFreePreview && previewEnded && (
+        <div className="text-center mb-3 py-2 px-4 bg-white/10 rounded-xl">
+          <p className="text-white/80 text-sm font-medium">
+            Preview ended — unlock the full track below
+          </p>
+        </div>
+      )}
+
       {/* Progress Bar */}
       <div className="flex items-center gap-3">
         <span className="text-xs text-white/50 w-10 text-right font-mono">
-          {formatTime(currentTime)}
+          {formatTime(displayTime)}
         </span>
         <div
           className="flex-1 h-2 bg-white/15 rounded-full cursor-pointer group relative"
@@ -119,9 +176,18 @@ export default function TrackPlayer({ audioUrl }: { audioUrl: string }) {
           />
         </div>
         <span className="text-xs text-white/50 w-10 font-mono">
-          {formatTime(duration)}
+          {isFreePreview ? `0:${PREVIEW_LIMIT}` : formatTime(duration)}
         </span>
       </div>
+
+      {/* Preview badge */}
+      {isFreePreview && (
+        <div className="text-center mt-3">
+          <span className="text-xs text-white/40">
+            Free preview — {PREVIEW_LIMIT}s of full track
+          </span>
+        </div>
+      )}
     </div>
   );
 }

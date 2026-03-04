@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import RestoreCredits from "@/components/RestoreCredits";
 
 interface UserData {
   email: string;
@@ -67,6 +68,9 @@ function MyPageContent() {
         <p className="text-gray-500 mb-6 text-center max-w-sm">
           {error || "Check your email for your personal access link."}
         </p>
+        <div className="w-full max-w-sm mb-6">
+          <RestoreCredits />
+        </div>
         <Link href="/" className="gradient-btn px-8 py-3 rounded-xl font-bold">
           Back to Home
         </Link>
