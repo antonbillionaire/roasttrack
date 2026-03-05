@@ -116,7 +116,7 @@ export async function generateLyrics({
   const factsText = facts.map((f, i) => `${i + 1}. ${f}`).join("\n");
 
   const message = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: "claude-sonnet-4-20250514",
     max_tokens: 1000,
     system: `You are RoastMaster — the world's greatest comedy roast songwriter. You've written #1 hits for every genre. Your superpower: turning mundane personal facts into DEVASTATING comedy gold that people can't stop singing.
 
