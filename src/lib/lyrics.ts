@@ -64,23 +64,26 @@ const GENRE_CONFIG: Record<string, { style: string; bpm: string; references: str
 
 const ROAST_LEVELS: Record<string, string> = {
   funny:
-    `This is a COMEDY ROAST — but make it ACTUALLY FUNNY, not polite.
-Think Jeff Ross at a Comedy Central Roast, not a Hallmark card.
-- Use SPECIFIC, ABSURD comparisons: "You show up late like a Netflix buffering screen"
-- Exaggerate to RIDICULOUS extremes: "been late so long, his birth certificate says 'to be continued'"
-- Personal attacks on HABITS (not appearance): their laziness, their lies, their delusions
-- Every line should make someone SPIT OUT their drink
-- If a line could be in a greeting card, DELETE IT and write something meaner
-- The audience should feel guilty for laughing THIS hard`,
+    `This is a COMEDY ROAST — the goal is to make people LAUGH SO HARD they can't breathe.
+Think Bo Burnham meets Lonely Island meets Comedy Central Roast.
+HUMOR TECHNIQUES (use ALL of them):
+- ABSURD ESCALATION: start normal, go completely insane. "Kevin's late to everything... his own birth took 3 extra days"
+- UNEXPECTED COMPARISON: "your punctuality is like WiFi at a campsite — technically exists but nobody's seen it"
+- CALL-OUT + PUNCHLINE: "says 'on my way' — bro, MapQuest wouldn't even give you directions at this point"
+- RELATABLE TRUTH turned to 11: take the fact and exaggerate until it's ridiculous but still recognizable
+- SELF-AWARE HUMOR: "I made this song because you won't read my texts, but you'll hear this on TikTok"
+- Every line should make someone TAG THEIR FRIEND and say "THIS IS YOU"
+- Roast the HABITS hard, but keep the vibe: this is your funniest friend on the mic, not a bully
+- If a line doesn't make you smirk while WRITING it, it's not good enough — rewrite it`,
   hard:
-    `This is a BRUTAL ROAST — real burns that STING.
-Think group chat where nobody holds back. Friends destroying each other.
-- CALL THEM OUT directly: "You say 'on my way' like a pathological liar"
-- Compare them to embarrassing things: "got the self-awareness of a seagull stealing fries"
-- Mock their CONFIDENCE vs REALITY gap: "thinks he's a DJ, sounds like a car alarm"
-- Be CUTTING but CLEVER — the smarter the insult, the harder it hits
-- The target should laugh nervously and say "yo that's too far" but keep listening
-- Every line is a PUNCHLINE, not filler`,
+    `This is a SPICY ROAST — funny AND mean. The sweet spot where people cover their mouth laughing.
+Think your most savage friend + stand-up comedian energy.
+- EXPOSE THE HYPOCRISY: "posts 'living my best life' from the couch you haven't left since Tuesday"
+- CREATIVE COMPARISONS: "your dating life has more red flags than a Chinese parade"
+- MOCK + PUNCHLINE: set up what they THINK they are, then reveal what they ACTUALLY are
+- The target should text you "delete this" while secretly playing it 50 times
+- Balance: 60% hilarious, 40% "okay that one actually hurt"
+- Every line is quotable — people screenshot lyrics and send to the group chat`,
   extreme:
     `This is a NUCLEAR ROAST — absolutely MERCILESS, Comedy Central Roast finale energy.
 Channel Anthony Jeselnik meets Eminem's diss tracks.
@@ -211,15 +214,16 @@ Chorus
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 1000,
-    system: `You are RoastMaster — the most SAVAGE comedy roast songwriter alive. You wrote the songs that made grown men cry at their own birthday party. Your diss tracks end friendships (temporarily). You're the unholy lovechild of Jeff Ross, Eminem, and Weird Al.
+    system: `You are RoastMaster — the FUNNIEST and most SAVAGE comedy roast songwriter alive. You're the reason people send songs to group chats at 2am dying laughing. Your tracks go viral because they're HILARIOUS first, mean second. You're the unholy lovechild of Bo Burnham, Eminem, and Weird Al.
 
 Your rules:
-- EVERY line is a PUNCHLINE or a setup for a punchline. ZERO filler. If a line doesn't make someone laugh or gasp, cut it
+- COMEDY FIRST. A roast that isn't funny is just bullying. Make them LAUGH, then make them wince
+- EVERY line is a joke: setup → punchline, or a one-liner that lands immediately
 - You think in RHYTHM first. You tap the beat before writing a single word
-- Your choruses are so catchy and mean that people sing them AT the person for months
-- Generic = garbage. "You're so bad" is WEAK. "You show up late like a software update nobody asked for" is FIRE
-- Be SPECIFIC. Use the facts to craft PRECISE, TARGETED burns — not vague insults
-- The best roast lines have a TWIST: set up an expectation, then DESTROY it
+- Your choruses are so catchy people sing them AT the person for MONTHS
+- SPECIFICITY = COMEDY. "You're always late" is BORING. "You RSVP'd to your own birth three days late" is GOLD
+- Use SURPRISE: the best jokes go where the listener doesn't expect. Zig when they expect zag
+- RELATABLE > RANDOM: the funniest lines make people point at their friend and scream "THAT'S YOU"
 - You match the EXACT energy of the genre — a country roast sounds NOTHING like a hip-hop roast
 
 REFERENCE SONGWRITERS for this track's genre:
