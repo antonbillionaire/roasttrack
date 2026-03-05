@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   title: "RoastTrack — AI Diss Track Generator",
   description: "Generate a personalized AI roast song about your friend. Enter their name, drop some facts, and get a fire diss track in seconds.",
   keywords: ["AI", "roast", "diss track", "music", "generator", "fun", "friends"],
+  icons: {
+    icon: "/icon.svg",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
