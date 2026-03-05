@@ -175,7 +175,7 @@ BPM controls syllables per line. Use this table:
 | 120–139 | 12–14           | 9–11             |
 | 140+    | 14–16           | 11–13            |
 
-Apply strictly for BPM ${config.bpm}. COUNT syllables in every line.
+Apply strictly for BPM ${config.bpm}. Count syllables mentally but do NOT write counts in the output.
 Chorus lines are always 20-30% SHORTER than Verse lines.
 
 ════════════════════════════════════
@@ -251,5 +251,6 @@ Chorus
     throw new Error("No lyrics generated");
   }
 
-  return textBlock.text;
+  // Strip syllable counts like (10) or (4) that the model sometimes adds
+  return textBlock.text.replace(/\s*\(\d{1,2}\)\s*$/gm, "");
 }

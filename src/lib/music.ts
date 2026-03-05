@@ -62,18 +62,28 @@ function parseLyricsToSections(lyrics: string): { name: string; lines: string[] 
   let currentSection = { name: "Verse", lines: [] as string[] };
 
   for (const line of lyrics.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
+    // Strip markdown formatting: **bold**, ##headers, trailing colons
+    const stripped = line.trim()
+      .replace(/^\*{1,3}\s*/, "").replace(/\s*\*{1,3}$/, "")
+      .replace(/^#{1,3}\s*/, "")
+      .replace(/:\s*$/, "");
+    if (!stripped) continue;
 
-    const sectionMatch = trimmed.match(/^\[?\s*(Verse\s*\d*|Chorus|Bridge|Outro|Intro|Hook|Pre-Chorus)\s*\]?\s*$/i);
+    const sectionMatch = stripped.match(/^\[?\s*(Verse\s*\d*|Chorus|Bridge|Outro|Intro|Hook|Pre-Chorus)\s*\]?\s*$/i);
     if (sectionMatch) {
       if (currentSection.lines.length > 0) {
         sections.push({ ...currentSection });
       }
       currentSection = { name: sectionMatch[1], lines: [] };
     } else {
-      const cleanLine = trimmed.replace(/\([^)]*\)/g, "").trim();
-      if (cleanLine) {
+      // Clean: remove syllable counts (10), parenthetical notes, markdown, quotes
+      const cleanLine = stripped
+        .replace(/\s*\(\d{1,2}\)\s*$/, "")
+        .replace(/\([^)]*\)/g, "")
+        .replace(/^\*{1,3}/, "").replace(/\*{1,3}$/, "")
+        .replace(/^["'`]|["'`]$/g, "")
+        .trim();
+      if (cleanLine && cleanLine.length > 1) {
         currentSection.lines.push(cleanLine);
       }
     }
@@ -83,6 +93,7 @@ function parseLyricsToSections(lyrics: string): { name: string; lines: string[] 
     sections.push(currentSection);
   }
 
+  console.log("Parsed sections:", JSON.stringify(sections.map(s => ({ name: s.name, lineCount: s.lines.length, lines: s.lines }))));
   return sections;
 }
 
@@ -109,6 +120,8 @@ export async function generateMusic(lyrics: string, genre: string): Promise<Buff
     negative_global_styles: styles.negative,
     sections,
   };
+
+  console.log("ElevenLabs composition plan:", JSON.stringify(compositionPlan, null, 2));
 
   const response = await fetch(
     `${ELEVENLABS_BASE_URL}/v1/music?output_format=mp3_44100_128`,
