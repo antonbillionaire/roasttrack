@@ -32,7 +32,7 @@ const GENRE_STYLES: Record<string, { positive: string[]; negative: string[] }> =
     negative: [...ALWAYS_NEGATIVE, "rock guitar", "classical piano"],
   },
   country: {
-    positive: ["country music", "acoustic guitar strumming", "twangy electric guitar", "fiddle melody", "steady kick-snare beat", "Nashville production", "full country band"],
+    positive: ["country music", "acoustic guitar", "steel guitar", "steady drums", "country rock band", "Nashville sound", "full band production"],
     negative: [...ALWAYS_NEGATIVE, "electronic synths", "hip-hop beat"],
   },
   rock: {
