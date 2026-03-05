@@ -15,54 +15,45 @@ interface CompositionPlan {
   sections: MusicSection[];
 }
 
+// Negative styles shared by all genres — always block acapella
+const ALWAYS_NEGATIVE = ["acapella", "a cappella", "no instruments", "spoken word", "podcast", "ambient noise"];
+
 const GENRE_STYLES: Record<string, { positive: string[]; negative: string[] }> = {
   hiphop: {
-    positive: ["hip-hop", "rap", "bouncy beat", "heavy bass", "drums", "confident vocals", "full instrumental backing"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "slow", "acoustic", "classical"],
+    positive: ["hip-hop beat", "rap vocals", "boom bap drums", "heavy 808 bass", "vinyl scratches", "confident male vocals", "full instrumental backing"],
+    negative: [...ALWAYS_NEGATIVE, "slow ballad", "classical orchestra"],
   },
   pop: {
-    positive: ["pop", "catchy", "upbeat", "bright synths", "drums", "full band", "sing-along"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "heavy metal", "dark"],
+    positive: ["pop music", "dance pop beat", "bright synthesizer melody", "four-on-the-floor drums", "catchy vocal hook", "radio-ready production", "full band"],
+    negative: [...ALWAYS_NEGATIVE, "heavy distortion", "dark atmosphere"],
   },
   reggaeton: {
-    positive: ["reggaeton", "dembow beat", "Latin rhythm", "percussion", "bass", "tropical", "full production"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "rock", "classical"],
+    positive: ["reggaeton dembow beat", "Latin percussion", "dancehall bass", "tropical synth melody", "Spanish guitar strum", "perreo rhythm", "full Latin production"],
+    negative: [...ALWAYS_NEGATIVE, "rock guitar", "classical piano"],
   },
   country: {
-    positive: ["country", "twangy guitar", "banjo", "drums", "full band", "honky-tonk", "upbeat"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "electronic"],
+    positive: ["country music", "acoustic guitar strumming", "twangy electric guitar", "fiddle melody", "steady kick-snare beat", "Nashville production", "full country band"],
+    negative: [...ALWAYS_NEGATIVE, "electronic synths", "hip-hop beat"],
   },
   rock: {
-    positive: ["punk rock", "electric guitar", "drums", "bass guitar", "aggressive energy", "full band", "loud"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "gentle", "electronic"],
+    positive: ["punk rock", "distorted electric guitar", "driving drum beat", "bass guitar riff", "aggressive energy", "full rock band", "loud arena sound"],
+    negative: [...ALWAYS_NEGATIVE, "gentle", "soft piano", "electronic beat"],
   },
   edm: {
-    positive: ["EDM", "electronic", "synth drop", "heavy bass", "drums", "danceable", "full production"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "acoustic", "slow"],
+    positive: ["EDM drop", "electronic synthesizer", "four-on-the-floor kick drum", "heavy bass wobble", "build-up and drop", "festival energy", "full electronic production"],
+    negative: [...ALWAYS_NEGATIVE, "acoustic guitar", "slow tempo", "classical"],
   },
   rnb: {
-    positive: ["R&B", "soul", "smooth vocals", "groovy bass", "drums", "keys", "full production"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "heavy metal", "fast"],
-  },
-  trap: {
-    positive: ["trap", "808 bass", "hi-hat rolls", "dark", "hard-hitting drums", "full production", "aggressive"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "acoustic", "gentle"],
-  },
-  jazz: {
-    positive: ["jazz", "swing", "saxophone", "walking bass", "drums", "piano", "full band", "smooth"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "electronic", "heavy"],
+    positive: ["R&B groove", "neo-soul beat", "smooth electric piano chords", "808 kick and snare", "silky vocal melody", "groovy bass guitar", "full R&B production"],
+    negative: [...ALWAYS_NEGATIVE, "heavy metal distortion", "fast punk tempo"],
   },
   afrobeat: {
-    positive: ["afrobeat", "African percussion", "groovy bass", "drums", "danceable", "full band", "joyful"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "slow", "classical"],
+    positive: ["afrobeat rhythm", "West African percussion", "talking drum pattern", "horn section melody", "groovy bass guitar", "polyrhythmic drums", "full Afrobeat band", "danceable groove"],
+    negative: [...ALWAYS_NEGATIVE, "slow ballad", "classical", "heavy metal"],
   },
   kpop: {
-    positive: ["K-pop", "catchy", "polished production", "synths", "drums", "full band", "bright", "energetic"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "slow", "dark"],
-  },
-  metal: {
-    positive: ["heavy metal", "distorted guitar", "double bass drums", "aggressive vocals", "full band", "loud"],
-    negative: ["acapella", "a cappella", "no instruments", "spoken word", "gentle", "acoustic", "electronic"],
+    positive: ["K-pop dance pop", "bright synth-pop melody", "hard-hitting electronic beat", "layered vocal harmony", "trap-influenced hi-hats", "polished idol-group production", "catchy hook", "full K-pop production"],
+    negative: [...ALWAYS_NEGATIVE, "acoustic folk", "dark ambient", "slow tempo"],
   },
 };
 
@@ -106,11 +97,11 @@ export async function generateMusic(lyrics: string, genre: string): Promise<Buff
   const sections: MusicSection[] = parsedSections.map((s) => ({
     section_name: s.name,
     positive_local_styles: s.name.toLowerCase().includes("chorus")
-      ? ["catchy", "energetic", "sing-along"]
-      : ["rhythmic", "flowing"],
+      ? ["catchy hook", "energetic", "sing-along", "louder"]
+      : ["rhythmic", "flowing", "verse energy"],
     negative_local_styles: [],
     duration_ms: Math.min(durationPerSection, 20000),
-    lines: s.lines.slice(0, 4), // Max 4 lines per section for 30-sec format
+    lines: s.lines.slice(0, 4),
   }));
 
   const compositionPlan: CompositionPlan = {

@@ -12,100 +12,86 @@ interface LyricsRequest {
   language: string;
 }
 
-// Genre-specific style + syllable guidance based on typical BPM
-const GENRE_CONFIG: Record<string, { style: string; syllables: string; bpm: string }> = {
+// Genre-specific style guidance
+const GENRE_CONFIG: Record<string, { style: string; bpm: string }> = {
   hiphop: {
-    style: "hip-hop/rap with hard-hitting bars, clever wordplay, and a bouncy beat feel",
-    syllables: "8-12 syllables per line (rap flow, slightly fast)",
-    bpm: "90-100 BPM",
+    style: "hip-hop/rap with hard-hitting bars, clever wordplay, bouncy beat, and confident delivery",
+    bpm: "90-100",
   },
   pop: {
-    style: "catchy pop with a memorable hook, upbeat rhythm, and sing-along chorus",
-    syllables: "6-10 syllables per line (singable, clear phrasing)",
-    bpm: "110-120 BPM",
+    style: "catchy pop with a memorable hook, upbeat rhythm, bright melody, and sing-along chorus",
+    bpm: "110-120",
   },
   reggaeton: {
-    style: "reggaeton with Latin rhythm, dembow beat feel, and playful flow",
-    syllables: "8-12 syllables per line (rhythmic, danceable flow)",
-    bpm: "90-100 BPM",
+    style: "reggaeton with dembow rhythm, Latin groove, playful flow, and danceable bounce",
+    bpm: "90-100",
   },
   country: {
-    style: "country with twangy storytelling, humor, and a honky-tonk vibe",
-    syllables: "6-10 syllables per line (conversational, storytelling pace)",
-    bpm: "100-110 BPM",
+    style: "country with twangy storytelling, humor, acoustic guitar feel, and honky-tonk vibe",
+    bpm: "100-110",
   },
   rock: {
-    style: "punk rock with aggressive energy, power chords feel, and raw attitude",
-    syllables: "6-10 syllables per line (punchy, shout-ready)",
-    bpm: "140-160 BPM",
+    style: "punk rock with aggressive energy, power chords feel, raw attitude, and shoutable chorus",
+    bpm: "140-160",
   },
   edm: {
-    style: "EDM/electronic with a drop, synth vibes, and danceable energy",
-    syllables: "4-8 syllables per line (short, chant-like, repetitive)",
-    bpm: "125-130 BPM",
+    style: "EDM/electronic with a synth drop, build-up energy, danceable beat, and chant-like vocals",
+    bpm: "125-130",
   },
   rnb: {
-    style: "smooth R&B with soulful vocals, groovy bassline, and silky melodies",
-    syllables: "6-10 syllables per line (smooth, melodic flow)",
-    bpm: "85-95 BPM",
-  },
-  trap: {
-    style: "trap with heavy 808 bass, hi-hat rolls, dark energy, and aggressive delivery",
-    syllables: "8-14 syllables per line (fast triplet flow, hard-hitting)",
-    bpm: "130-150 BPM",
-  },
-  jazz: {
-    style: "jazz/swing with smooth saxophone feel, walking bassline, and witty lounge delivery",
-    syllables: "6-10 syllables per line (conversational, swinging rhythm)",
-    bpm: "110-130 BPM",
+    style: "smooth R&B with soulful vocals, groovy bassline, silky melodies, and laid-back groove",
+    bpm: "85-95",
   },
   afrobeat: {
-    style: "afrobeat with infectious rhythm, percussive groove, and joyful danceable energy",
-    syllables: "6-10 syllables per line (rhythmic, percussive flow)",
-    bpm: "100-120 BPM",
+    style: "afrobeat with infectious polyrhythmic groove, percussive energy, horn-like melodies, and joyful dance feel",
+    bpm: "100-120",
   },
   kpop: {
-    style: "K-pop with catchy hook, polished production, and addictive chorus",
-    syllables: "6-10 syllables per line (tight, catchy phrasing)",
-    bpm: "115-130 BPM",
-  },
-  metal: {
-    style: "heavy metal with aggressive vocals, distorted guitars, and raw power",
-    syllables: "6-10 syllables per line (aggressive, shout-ready)",
-    bpm: "140-180 BPM",
+    style: "K-pop with bright synth-pop production, addictive dance-pop chorus, rapid-fire verse, and polished idol-group energy",
+    bpm: "115-130",
   },
 };
 
 const ROAST_LEVELS: Record<string, string> = {
   funny:
-    "Make it HILARIOUS — pure comedy, absurd comparisons, over-the-top silly. Like a stand-up comedian roasting a friend at a birthday party. The goal is everyone laughing, nobody hurt. Exaggerate everything. No actual burns, just comedy gold.",
+    "This is a COMEDY ROAST — pure laughs, absurd exaggerations, over-the-top silly comparisons. Like a stand-up comedian at a friend's birthday party. Everyone is laughing, nobody is hurt. The goal is to make the listener CRACK UP. Exaggerate everything to ridiculous extremes.",
   hard:
-    "Friendly roast with some edge — playful teasing, gentle burns, affectionate jabs. Like friends joking around. Clever wordplay, funny comparisons, lighthearted but pointed.",
+    "This is a SPICY ROAST — playful teasing with real edge, clever burns, affectionate but pointed jabs. Like friends trash-talking each other. Clever wordplay, funny but cutting comparisons. The target should laugh AND wince.",
   extreme:
-    "Savage roast — clever burns, brutal honesty, comedy roast show level. Witty, cutting, no holding back. However: NO hate speech, NO slurs, NO attacks on appearance/race/gender/disability. Channel the savagery through CREATIVITY and WIT.",
+    "This is a SAVAGE ROAST — brutal honesty, razor-sharp wit, comedy roast show level. No holding back. However: NO hate speech, NO slurs, NO attacks on appearance/race/gender/disability. Channel ALL savagery through CREATIVITY and WIT — the smarter the burn, the harder it hits.",
 };
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-  en: `Write in English only.
-- Use simple, common words that are easy to pronounce
+  en: `LANGUAGE: ENGLISH
+- Use simple, common words that are easy to sing
 - Avoid abbreviations, acronyms, or words with silent letters
-- Prefer one-word or two-syllable rhymes (e.g., "day/way", "name/shame")`,
-  ru: `Write ALL lyrics in Russian (Cyrillic). The entire song must be in Russian.
-CRITICAL RULES FOR RUSSIAN:
+- Prefer clean one-syllable or two-syllable rhymes (e.g., "day/way", "name/shame", "friend/end")
+- Every line must sound natural when spoken out loud`,
+  ru: `LANGUAGE: RUSSIAN (Cyrillic only, zero English words)
+
+WORD CHOICE:
+- Maximum 6-8 words per line (Verse), 4-6 words per line (Chorus)
 - Use ONLY simple 2-3 syllable words with obvious, unambiguous stress
-- NEVER use words where stress changes meaning (замок, мука, белки, стрелки, etc.)
-- Each line: maximum 6-8 simple words
-- Prefer words ending in -ать, -ить, -ой, -ая, -ение
-- Use natural colloquial Russian, short punchy phrases
+- BANNED words (ambiguous stress): замок, мука, белки, стрелки, писать, атлас, орган, хаос, ирис
+- Preferred word endings: -ать, -ить, -ой, -ая, -ул, -ал, -ом
+- Style reference: Тимати, Баста, Oxxxymiron — street, punchy, colloquial
+- Natural spoken Russian — not textbook, not formal
 - Do NOT use English words written in Cyrillic
 - Do NOT use complex compound words or bureaucratic vocabulary
-- Rhymes must be clean and obvious: -ать/-ать, -ой/-ой, -ил/-ил, -ать/-ять
-- Think of how Тимати or Баста would write — simple, street, rhythmic`,
-  es: `Write ALL lyrics in Spanish. The entire song must be in Spanish.
-- Use natural Spanish slang and wordplay
+
+GENDER ENFORCEMENT (check EVERY line):
+- FEMININE: прошла, сделала, она такая, крутая девушка
+- MASCULINE: прошёл, сделал, он такой, крутой парень
+- Every verb, adjective, and participle must match the target's gender
+
+RHYME REQUIREMENTS:
+- Pure rhymes only: -ать/-ать, -ой/-ой, -ил/-ил, -ул/-ул, -ала/-ала
+- No approximate rhymes — rhyming words must share stressed vowel + following sounds`,
+  es: `LANGUAGE: SPANISH (zero English words)
+- Use natural Latin American Spanish slang and wordplay
 - Prefer words with clear vowel endings for clean rhymes
 - Avoid complex conjugations — keep it conversational
-- Use Rioplatense or neutral Latin American Spanish`,
+- Style: reggaeton/urban flow, colloquial, street`,
 };
 
 export async function generateLyrics({
@@ -126,80 +112,113 @@ export async function generateLyrics({
     messages: [
       {
         role: "user",
-        content: `You are a songwriter for a 1-minute AI-sung roast track. The AI voice sings the lyrics — you must write for SINGING, not reading.
+        content: `You are a professional songwriter writing lyrics for a 1-minute AI-sung ROAST track. The AI voice will SING these lyrics — write for SINGING, not reading.
 
 TARGET PERSON: "${name}"
 
-GENDER: Determine the gender from the name "${name}".
-- If the name is clearly feminine (e.g., Sarah, Мария, Анна, Jessica) → use she/her pronouns. For Russian: use feminine verb forms (-ла, -ает) and feminine adjectives (-ая, -ная).
-- If the name is clearly masculine (e.g., Kevin, Дмитрий, Mike) → use he/him pronouns. For Russian: use masculine verb forms (-л, -ает) and masculine adjectives (-ой, -ный).
-- If ambiguous → default to he/him (masculine).
-THIS IS CRITICAL — wrong gender ruins the song.
+════════════════════════════════════
+STEP 1 — GENDER (determine BEFORE writing)
+════════════════════════════════════
+
+Analyze the name "${name}":
+- FEMININE (Sarah, Мария, Anna, Катя, Jessica, Лена, Sofia, Ольга) → she/her
+- MASCULINE (Kevin, Дмитрий, Mike, Алексей, James, Иван, David, Сергей) → he/him
+- AMBIGUOUS → default MASCULINE
+
+⚠️ LOCK the gender. Every pronoun, verb form, and adjective in the ENTIRE song must match.
+
+════════════════════════════════════
+STEP 2 — SONG PARAMETERS
+════════════════════════════════════
 
 FACTS ABOUT THEM:
 ${factsText}
 
-MUSIC STYLE: ${config.style} (${config.bpm})
+MUSIC STYLE: ${config.style}
+BPM: ${config.bpm}
 
 ROAST TONE: ${levelInstructions}
 
-CRITICAL SONGWRITING RULES:
+════════════════════════════════════
+STEP 3 — RHYTHM & TEMPO
+════════════════════════════════════
 
-1. STRUCTURE — exactly 4 sections (for a ~1 minute song):
-   Verse 1 (4 lines)
-   Chorus (4 lines)
-   Verse 2 (4 lines)
-   Chorus (repeat the EXACT same 4 lines from the first Chorus)
+BPM controls syllables per line. Use this table:
 
-   You write 12 UNIQUE lines total. The second Chorus is a copy of the first.
+| BPM     | Verse syllables | Chorus syllables |
+|---------|-----------------|------------------|
+| 60–99   | 8–10            | 6–8              |
+| 100–119 | 10–12           | 7–9              |
+| 120–139 | 12–14           | 9–11             |
+| 140+    | 14–16           | 11–13            |
 
-2. RHYTHM — every line must have ${config.syllables}. Count your syllables! Lines that are too long will sound rushed. Lines that are too short will have awkward pauses.
+Apply strictly for BPM ${config.bpm}. COUNT syllables in every line.
+Chorus lines are always 20-30% SHORTER than Verse lines.
 
-3. RHYME SCHEME — use AABB (line 1 rhymes with line 2, line 3 rhymes with line 4). End-rhymes must be STRONG and OBVIOUS — the listener should immediately hear the rhyme.
+════════════════════════════════════
+STEP 4 — STRUCTURE & TRANSITIONS
+════════════════════════════════════
 
-4. SINGABILITY — this will be sung by an AI voice:
-   - Use simple, common words (no jargon, no abbreviations)
-   - Avoid tongue-twisters or consonant clusters
-   - End lines on strong vowel sounds when possible
-   - Each line should be one natural breath phrase
-   - The chorus should feel like a chant people can repeat
+Write exactly 12 UNIQUE lines:
 
-5. CONTENT:
-   - Verse 1: introduce ${name}, set the scene, reference 1-2 facts
-   - Chorus: the catchy hook everyone remembers — use "${name}" here
-   - Verse 2: dig deeper, reference remaining facts, build on the roast
-   - Reference the facts creatively across both verses
-   - Use "${name}" at least 3 times across the whole song
-   - Make the chorus the most fun part to sing along to
+Verse 1 (4 lines) — introduce "${name}", set scene, reference facts 1-2
+Chorus  (4 lines) — catchy hook, use "${name}", singable chant
+Verse 2 (4 lines) — dig deeper, remaining facts, escalate the roast
+Chorus  (copy-paste the EXACT same 4 lines from first Chorus)
 
-6. LANGUAGE:
+Use "${name}" minimum 3 times across the full song.
+
+TRANSITION RULES:
+- Line 4 of every Verse must be SHORT (max 6 syllables) and feel FINAL
+- Chorus Line 1 MUST start with "${name}" or an exclamation (Oh!, Hey!, Yeah!)
+- Chorus = STACCATO, PUNCHY — each word lands like a chant people yell back
+- Verse = conversational, flowing, storytelling
+- The contrast between Verse and Chorus must be obvious
+
+════════════════════════════════════
+STEP 5 — RHYME & SINGABILITY
+════════════════════════════════════
+
+RHYME: AABB per section (lines 1-2 rhyme, lines 3-4 rhyme)
+- Rhymes must be OBVIOUS on first listen
+- End lines on strong vowel sounds when possible
+- Each line = one natural breath phrase
+- No tongue-twisters, no consonant clusters, no abbreviations
+- The chorus must feel like something a crowd can yell back
+
+════════════════════════════════════
+STEP 6 — LANGUAGE
+════════════════════════════════════
+
 ${langInstructions}
 
-OUTPUT FORMAT — write ONLY the lyrics, nothing else:
+════════════════════════════════════
+OUTPUT — write ONLY the lyrics, nothing else:
+════════════════════════════════════
 
 Verse 1
-(line 1)
-(line 2)
-(line 3)
-(line 4)
+[line 1]
+[line 2]
+[line 3]
+[line 4]
 
 Chorus
-(line 1)
-(line 2)
-(line 3)
-(line 4)
+[line 1]
+[line 2]
+[line 3]
+[line 4]
 
 Verse 2
-(line 1)
-(line 2)
-(line 3)
-(line 4)
+[line 1]
+[line 2]
+[line 3]
+[line 4]
 
 Chorus
-(line 1)
-(line 2)
-(line 3)
-(line 4)`,
+[line 1]
+[line 2]
+[line 3]
+[line 4]`,
       },
     ],
   });
