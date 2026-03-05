@@ -12,43 +12,52 @@ interface LyricsRequest {
   language: string;
 }
 
-// Genre-specific style guidance
-const GENRE_CONFIG: Record<string, { style: string; bpm: string }> = {
+// Genre-specific style guidance with reference songwriters
+const GENRE_CONFIG: Record<string, { style: string; bpm: string; references: string }> = {
   hiphop: {
     style: "hip-hop/rap with hard-hitting bars, clever wordplay, bouncy beat, and confident delivery",
     bpm: "90-100",
+    references: "Eminem (razor-sharp wordplay, multi-syllabic rhymes, comedic storytelling), Kendrick Lamar (layered metaphors, rhythmic precision, narrative depth), Drake (catchy melodic hooks, quotable punchlines, effortless flow)",
   },
   pop: {
     style: "catchy pop with a memorable hook, upbeat rhythm, bright melody, and sing-along chorus",
     bpm: "110-120",
+    references: "Max Martin (bulletproof song structure, irresistible hooks, every syllable singable), Ed Sheeran (conversational storytelling that becomes a chant, simple words with emotional punch), Sia (powerful emotional build, anthemic chorus, raw vocal energy)",
   },
   reggaeton: {
     style: "reggaeton with dembow rhythm, Latin groove, playful flow, and danceable bounce",
     bpm: "90-100",
+    references: "Bad Bunny (playful wordplay, unexpected metaphors, genre-bending creativity), Daddy Yankee (rhythmic precision on dembow, crowd-chant hooks, raw street energy), J Balvin (minimalist catchy phrases, sing-along simplicity, infectious repetition)",
   },
   country: {
     style: "country with twangy storytelling, humor, acoustic guitar feel, and honky-tonk vibe",
     bpm: "100-110",
+    references: "Toby Keith (witty humor, patriotic swagger, crowd-sing choruses), Dolly Parton (brilliant storytelling, clever wordplay wrapped in simplicity, emotional truth), Chris Stapleton (raw honest lyrics, soulful phrasing, every word lands heavy)",
   },
   rock: {
     style: "punk rock with aggressive energy, power chords feel, raw attitude, and shoutable chorus",
     bpm: "140-160",
+    references: "Billie Joe Armstrong/Green Day (fast punk anthems, shoutable one-line hooks, raw teenage energy), Dave Grohl/Foo Fighters (massive arena choruses, emotional intensity, singable aggression), Freddie Mercury/Queen (theatrical builds, crowd-participation hooks, legendary phrasing)",
   },
   edm: {
     style: "EDM/electronic with a synth drop, build-up energy, danceable beat, and chant-like vocals",
     bpm: "125-130",
+    references: "David Guetta (anthemic topline vocals, euphoric build-drop structure, festival-ready phrases), Skrillex (rhythmic vocal chops, minimal but punchy lyrics, drop-oriented energy), Calvin Harris (pop-crossover hooks, simple sing-along melodies, summer-anthem feel)",
   },
   rnb: {
     style: "smooth R&B with soulful vocals, groovy bassline, silky melodies, and laid-back groove",
     bpm: "85-95",
+    references: "The Weeknd (dark atmospheric storytelling, falsetto hooks, cinematic mood), Frank Ocean (poetic vulnerability, unexpected imagery, stream-of-consciousness flow), SZA (conversational honesty, melodic runs, relatable emotional detail)",
   },
   afrobeat: {
     style: "afrobeat with infectious polyrhythmic groove, percussive energy, horn-like melodies, and joyful dance feel",
     bpm: "100-120",
+    references: "Burna Boy (commanding vocal presence, Pidgin-English swagger, global Afrofusion storytelling), Wizkid (effortless melodic flow, minimal but catchy phrases, smooth romantic hooks), Fela Kuti (call-and-response chants, socially charged repetition, hypnotic groove lyrics)",
   },
   kpop: {
     style: "K-pop with bright synth-pop production, addictive dance-pop chorus, rapid-fire verse, and polished idol-group energy",
     bpm: "115-130",
+    references: "Teddy Park/BLACKPINK (fierce rap-sing switch, badass one-liners, addictive chant hooks), Bang Si-hyuk/BTS (emotional storytelling over dance beats, fan-chant-ready phrases, motivational energy), JYP/TWICE (ultra-catchy repeated hooks, aegyo charm, point-choreography lyrics)",
   },
 };
 
@@ -107,12 +116,26 @@ export async function generateLyrics({
   const factsText = facts.map((f, i) => `${i + 1}. ${f}`).join("\n");
 
   const message = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-sonnet-4-6-20250514",
     max_tokens: 1000,
+    system: `You are RoastMaster — the world's greatest comedy roast songwriter. You've written #1 hits for every genre. Your superpower: turning mundane personal facts into DEVASTATING comedy gold that people can't stop singing.
+
+Your rules:
+- You write BANGERS. Every line must hit hard — either funny or catchy, ideally both
+- You think in RHYTHM first. You tap the beat before writing a single word
+- Your choruses get stuck in people's heads for DAYS
+- You never write generic filler lines. Every bar earns its place
+- You match the EXACT energy of the genre — a country roast sounds NOTHING like a hip-hop roast
+- You study the reference artists below and channel their specific songwriting techniques
+
+REFERENCE SONGWRITERS for this track's genre:
+${config.references}
+
+Study these artists' techniques: their rhyme patterns, hook structures, rhythmic choices, and what makes their songs memorable. Channel their energy into this roast track.`,
     messages: [
       {
         role: "user",
-        content: `You are a professional songwriter writing lyrics for a 1-minute AI-sung ROAST track. The AI voice will SING these lyrics — write for SINGING, not reading.
+        content: `Write lyrics for a 1-minute AI-sung ROAST track. The AI voice will SING these lyrics — write for SINGING, not reading.
 
 TARGET PERSON: "${name}"
 
