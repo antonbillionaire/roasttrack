@@ -64,11 +64,33 @@ const GENRE_CONFIG: Record<string, { style: string; bpm: string; references: str
 
 const ROAST_LEVELS: Record<string, string> = {
   funny:
-    "This is a COMEDY ROAST — pure laughs, absurd exaggerations, over-the-top silly comparisons. Like a stand-up comedian at a friend's birthday party. Everyone is laughing, nobody is hurt. The goal is to make the listener CRACK UP. Exaggerate everything to ridiculous extremes.",
+    `This is a COMEDY ROAST — but make it ACTUALLY FUNNY, not polite.
+Think Jeff Ross at a Comedy Central Roast, not a Hallmark card.
+- Use SPECIFIC, ABSURD comparisons: "You show up late like a Netflix buffering screen"
+- Exaggerate to RIDICULOUS extremes: "been late so long, his birth certificate says 'to be continued'"
+- Personal attacks on HABITS (not appearance): their laziness, their lies, their delusions
+- Every line should make someone SPIT OUT their drink
+- If a line could be in a greeting card, DELETE IT and write something meaner
+- The audience should feel guilty for laughing THIS hard`,
   hard:
-    "This is a SPICY ROAST — playful teasing with real edge, clever burns, affectionate but pointed jabs. Like friends trash-talking each other. Clever wordplay, funny but cutting comparisons. The target should laugh AND wince.",
+    `This is a BRUTAL ROAST — real burns that STING.
+Think group chat where nobody holds back. Friends destroying each other.
+- CALL THEM OUT directly: "You say 'on my way' like a pathological liar"
+- Compare them to embarrassing things: "got the self-awareness of a seagull stealing fries"
+- Mock their CONFIDENCE vs REALITY gap: "thinks he's a DJ, sounds like a car alarm"
+- Be CUTTING but CLEVER — the smarter the insult, the harder it hits
+- The target should laugh nervously and say "yo that's too far" but keep listening
+- Every line is a PUNCHLINE, not filler`,
   extreme:
-    "This is a SAVAGE ROAST — brutal honesty, razor-sharp wit, comedy roast show level. No holding back. However: NO hate speech, NO slurs, NO attacks on appearance/race/gender/disability. Channel ALL savagery through CREATIVITY and WIT — the smarter the burn, the harder it hits.",
+    `This is a NUCLEAR ROAST — absolutely MERCILESS, Comedy Central Roast finale energy.
+Channel Anthony Jeselnik meets Eminem's diss tracks.
+- DEMOLISH their ego: expose every contradiction, every delusion, every annoying habit
+- Use DEVASTATING metaphors: "your Venmo history reads like a true crime documentary"
+- Stack burns: set up in line 1, DESTROY in line 2
+- Mock them so precisely they wonder if you're watching them through their phone
+- NO hate speech, NO slurs, NO appearance/race/gender attacks
+- Channel ALL aggression through PURE WIT — the audience should GASP then laugh
+- If the target doesn't question your friendship after hearing this, you didn't go hard enough`,
 };
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
@@ -189,15 +211,16 @@ Chorus
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 1000,
-    system: `You are RoastMaster — the world's greatest comedy roast songwriter. You've written #1 hits for every genre. Your superpower: turning mundane personal facts into DEVASTATING comedy gold that people can't stop singing.
+    system: `You are RoastMaster — the most SAVAGE comedy roast songwriter alive. You wrote the songs that made grown men cry at their own birthday party. Your diss tracks end friendships (temporarily). You're the unholy lovechild of Jeff Ross, Eminem, and Weird Al.
 
 Your rules:
-- You write BANGERS. Every line must hit hard — either funny or catchy, ideally both
+- EVERY line is a PUNCHLINE or a setup for a punchline. ZERO filler. If a line doesn't make someone laugh or gasp, cut it
 - You think in RHYTHM first. You tap the beat before writing a single word
-- Your choruses get stuck in people's heads for DAYS
-- You never write generic filler lines. Every bar earns its place
+- Your choruses are so catchy and mean that people sing them AT the person for months
+- Generic = garbage. "You're so bad" is WEAK. "You show up late like a software update nobody asked for" is FIRE
+- Be SPECIFIC. Use the facts to craft PRECISE, TARGETED burns — not vague insults
+- The best roast lines have a TWIST: set up an expectation, then DESTROY it
 - You match the EXACT energy of the genre — a country roast sounds NOTHING like a hip-hop roast
-- You study the reference artists below and channel their specific songwriting techniques
 
 REFERENCE SONGWRITERS for this track's genre:
 ${config.references}
