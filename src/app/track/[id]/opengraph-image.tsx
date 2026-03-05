@@ -7,17 +7,14 @@ export const contentType = "image/png";
 
 const GENRE_LABELS: Record<string, { label: string; emoji: string }> = {
   hiphop: { label: "Hip-Hop", emoji: "🎤" },
-  trap: { label: "Trap", emoji: "🔊" },
   pop: { label: "Pop", emoji: "🎵" },
   kpop: { label: "K-Pop", emoji: "💜" },
   reggaeton: { label: "Reggaeton", emoji: "🌴" },
   rnb: { label: "R&B", emoji: "🎹" },
   country: { label: "Country", emoji: "🤠" },
   rock: { label: "Rock", emoji: "🎸" },
-  metal: { label: "Metal", emoji: "🤘" },
   edm: { label: "EDM", emoji: "🎧" },
   afrobeat: { label: "Afrobeat", emoji: "🥁" },
-  jazz: { label: "Jazz", emoji: "🎷" },
 };
 
 const LEVEL_LABELS: Record<string, { label: string; emoji: string }> = {

@@ -19,17 +19,14 @@ interface UserData {
 
 const GENRE_EMOJIS: Record<string, string> = {
   hiphop: "🎤",
-  trap: "🔊",
   pop: "🎵",
   kpop: "💜",
   reggaeton: "🌴",
   rnb: "🎹",
   country: "🤠",
   rock: "🎸",
-  metal: "🤘",
   edm: "🎧",
   afrobeat: "🥁",
-  jazz: "🎷",
 };
 
 function MyPageContent() {

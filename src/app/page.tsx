@@ -6,17 +6,14 @@ import RestoreCredits from "@/components/RestoreCredits";
 
 const GENRES = [
   { id: "hiphop", label: "Hip-Hop", emoji: "🎤", bg: "bg-purple-100 border-purple-300 text-purple-700" },
-  { id: "trap", label: "Trap", emoji: "🔊", bg: "bg-violet-100 border-violet-300 text-violet-700" },
   { id: "pop", label: "Pop", emoji: "🎵", bg: "bg-pink-100 border-pink-300 text-pink-700" },
   { id: "kpop", label: "K-Pop", emoji: "💜", bg: "bg-fuchsia-100 border-fuchsia-300 text-fuchsia-700" },
   { id: "reggaeton", label: "Reggaeton", emoji: "🌴", bg: "bg-orange-100 border-orange-300 text-orange-700" },
   { id: "rnb", label: "R&B", emoji: "🎹", bg: "bg-indigo-100 border-indigo-300 text-indigo-700" },
   { id: "country", label: "Country", emoji: "🤠", bg: "bg-amber-100 border-amber-300 text-amber-700" },
   { id: "rock", label: "Rock", emoji: "🎸", bg: "bg-red-100 border-red-300 text-red-700" },
-  { id: "metal", label: "Metal", emoji: "🤘", bg: "bg-stone-100 border-stone-300 text-stone-700" },
   { id: "edm", label: "EDM", emoji: "🎧", bg: "bg-cyan-100 border-cyan-300 text-cyan-700" },
   { id: "afrobeat", label: "Afrobeat", emoji: "🥁", bg: "bg-emerald-100 border-emerald-300 text-emerald-700" },
-  { id: "jazz", label: "Jazz", emoji: "🎷", bg: "bg-yellow-100 border-yellow-300 text-yellow-700" },
 ];
 
 const ROAST_LEVELS = [
@@ -249,13 +246,13 @@ export default function Home() {
           <label className="block text-sm font-bold text-gray-700 mb-3">
             Pick a vibe 🎶
           </label>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {GENRES.map((g) => (
               <button
                 key={g.id}
                 type="button"
                 onClick={() => setGenre(g.id)}
-                className={`genre-pill px-1.5 py-2 rounded-xl text-[11px] font-bold cursor-pointer border-2 ${
+                className={`genre-pill px-2 py-2.5 rounded-xl text-xs font-bold cursor-pointer border-2 ${
                   genre === g.id
                     ? `${g.bg} active`
                     : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"
