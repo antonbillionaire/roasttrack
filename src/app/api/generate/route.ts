@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, facts, genre, roastLevel, language, accessToken } = body;
+    const { name, facts, genre, roastLevel, language, accessToken, durationSeconds, adminSecret } = body;
 
     // Input validation
     if (!name?.trim()) {
@@ -42,16 +42,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least one fact is required" }, { status: 400 });
     }
 
+    // Admin bypass via secret key (for batch scripts)
+    const isAdminBySecret = adminSecret && process.env.ADMIN_SECRET && adminSecret === process.env.ADMIN_SECRET;
+
     // Check credits: if accessToken provided, deduct credit; otherwise free preview
     let userId: string | null = null;
     let isFreePreview = true;
+    let isAdmin = !!isAdminBySecret;
 
-    if (accessToken) {
+    if (isAdminBySecret) {
+      // Admin via secret — no token needed, no credits deducted
+      isFreePreview = false;
+    } else if (accessToken) {
       const user = await getUserByToken(accessToken);
       if (!user) {
         return NextResponse.json({ error: "Invalid access token" }, { status: 401 });
       }
-      const isAdmin = ADMIN_EMAILS.includes(user.email);
+      isAdmin = ADMIN_EMAILS.includes(user.email);
       if (!isAdmin) {
         if (user.credits_remaining < 1) {
           return NextResponse.json(
@@ -89,8 +96,10 @@ export async function POST(req: NextRequest) {
     console.log("Lyrics generated successfully");
 
     // 2. Generate music with ElevenLabs
-    console.log("Generating music...");
-    const audioBuffer = await generateMusic(lyrics, genre || "hiphop");
+    // Admin can request custom duration (e.g. 30s for video content)
+    const duration = isAdmin && durationSeconds ? durationSeconds : 60;
+    console.log(`Generating music... (${duration}s)`);
+    const audioBuffer = await generateMusic(lyrics, genre || "hiphop", duration);
     console.log("Music generated, size:", audioBuffer.length, "bytes");
 
     // 3. Upload to Supabase Storage

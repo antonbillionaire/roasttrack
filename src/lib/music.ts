@@ -97,12 +97,11 @@ function parseLyricsToSections(lyrics: string): { name: string; lines: string[] 
   return sections;
 }
 
-export async function generateMusic(lyrics: string, genre: string): Promise<Buffer> {
+export async function generateMusic(lyrics: string, genre: string, durationSeconds = 60): Promise<Buffer> {
   const styles = GENRE_STYLES[genre] || GENRE_STYLES.hiphop;
   const parsedSections = parseLyricsToSections(lyrics);
 
-  // Target: ~60 sec total. Split evenly between sections.
-  const totalDurationMs = 60000;
+  const totalDurationMs = durationSeconds * 1000;
   const durationPerSection = Math.floor(totalDurationMs / Math.max(parsedSections.length, 1));
 
   const sections: MusicSection[] = parsedSections.map((s) => ({

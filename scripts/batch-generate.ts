@@ -159,7 +159,8 @@ async function generateTrack(track: typeof TRACKS[0], index: number) {
         genre: track.genre,
         roastLevel: track.roastLevel,
         language: track.language,
-        accessToken: null, // Uses free preview or admin bypass
+        adminSecret: process.env.ADMIN_SECRET,
+        durationSeconds: 30, // Short tracks for video content
       }),
     });
 
@@ -171,6 +172,8 @@ async function generateTrack(track: typeof TRACKS[0], index: number) {
 
     const data = await res.json();
     const trackUrl = `https://roasttrack.com/track/${data.id}`;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const mp3Url = `${supabaseUrl}/storage/v1/object/public/tracks/${data.id}.mp3`;
 
     // Generate video metadata
     const descTemplate = DESCRIPTIONS[index % DESCRIPTIONS.length];
@@ -181,6 +184,7 @@ async function generateTrack(track: typeof TRACKS[0], index: number) {
     const pinnedComment = PINNED_COMMENTS[index % PINNED_COMMENTS.length];
 
     console.log(`  URL: ${trackUrl}`);
+    console.log(`  MP3: ${mp3Url}`);
     console.log(`  Hook: "${track.hook}"`);
     console.log(`  Description: ${description}`);
     console.log(`  Pinned: ${pinnedComment}`);
@@ -190,6 +194,7 @@ async function generateTrack(track: typeof TRACKS[0], index: number) {
       genre: track.genre,
       language: track.language,
       url: trackUrl,
+      mp3: mp3Url,
       hook: track.hook,
       description,
       pinnedComment,
@@ -223,6 +228,7 @@ async function main() {
 
   for (const r of results) {
     console.log(`${r.name} (${r.genre}) — ${r.url}`);
+    console.log(`  MP3:  ${r.mp3}`);
     console.log(`  Hook: ${r.hook}`);
     console.log(`  Desc: ${r.description}`);
     console.log(`  Pin:  ${r.pinnedComment}\n`);
