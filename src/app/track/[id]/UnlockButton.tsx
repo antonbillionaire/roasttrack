@@ -10,7 +10,7 @@ export default function UnlockButton({ trackId }: { trackId: string }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("roasttrack_token");
+    const saved = localStorage.getItem("rt_token");
     if (saved) {
       setToken(saved);
       // Fetch credits

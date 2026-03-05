@@ -9,6 +9,7 @@ const MAX_FREE_PREVIEWS_PER_DAY = 1;
 const MAX_NAME_LENGTH = 50;
 const MAX_FACT_LENGTH = 150;
 const MAX_FACTS = 5;
+const ADMIN_EMAILS = ["anton.v.melnikov@gmail.com"];
 
 export const maxDuration = 180;
 
@@ -50,15 +51,18 @@ export async function POST(req: NextRequest) {
       if (!user) {
         return NextResponse.json({ error: "Invalid access token" }, { status: 401 });
       }
-      if (user.credits_remaining < 1) {
-        return NextResponse.json(
-          { error: "No credits remaining. Buy a pack to generate more tracks!" },
-          { status: 402 }
-        );
-      }
-      const deducted = await deductCredit(user.id);
-      if (!deducted) {
-        return NextResponse.json({ error: "Failed to deduct credit" }, { status: 402 });
+      const isAdmin = ADMIN_EMAILS.includes(user.email);
+      if (!isAdmin) {
+        if (user.credits_remaining < 1) {
+          return NextResponse.json(
+            { error: "No credits remaining. Buy a pack to generate more tracks!" },
+            { status: 402 }
+          );
+        }
+        const deducted = await deductCredit(user.id);
+        if (!deducted) {
+          return NextResponse.json({ error: "Failed to deduct credit" }, { status: 402 });
+        }
       }
       userId = user.id;
       isFreePreview = false;

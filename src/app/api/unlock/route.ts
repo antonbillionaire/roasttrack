@@ -3,6 +3,8 @@ import { getUserByToken, deductCredit } from "@/lib/db";
 import { supabaseAdmin } from "@/lib/supabase";
 import { rateLimit, getIP } from "@/lib/rate-limit";
 
+const ADMIN_EMAILS = ["anton.v.melnikov@gmail.com"];
+
 export async function POST(req: NextRequest) {
   // Rate limit: 10 requests per minute per IP
   const ip = getIP(req.headers);
@@ -26,7 +28,8 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
-    if (user.credits_remaining < 1) {
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+    if (!isAdmin && user.credits_remaining < 1) {
       return NextResponse.json({ error: "No credits remaining" }, { status: 402 });
     }
 
@@ -45,10 +48,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Track is already unlocked" }, { status: 400 });
     }
 
-    // Deduct 1 credit
-    const deducted = await deductCredit(user.id);
-    if (!deducted) {
-      return NextResponse.json({ error: "Failed to deduct credit" }, { status: 402 });
+    // Deduct 1 credit (skip for admins)
+    if (!isAdmin) {
+      const deducted = await deductCredit(user.id);
+      if (!deducted) {
+        return NextResponse.json({ error: "Failed to deduct credit" }, { status: 402 });
+      }
     }
 
     // Update metadata: mark as not a free preview
