@@ -84,20 +84,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Admin can request custom duration (e.g. 30s for video content)
+    const duration = isAdmin && durationSeconds ? durationSeconds : 60;
+
     // 1. Generate lyrics with Claude
-    console.log("Generating lyrics...");
+    console.log(`Generating lyrics... (${duration}s track)`);
     const lyrics = await generateLyrics({
       name: name.trim(),
       facts: validFacts.map((f: string) => f.trim()),
       genre: genre || "hiphop",
       roastLevel: roastLevel || "funny",
       language: language || "en",
+      durationSeconds: duration,
     });
     console.log("Lyrics generated successfully");
-
-    // 2. Generate music with ElevenLabs
-    // Admin can request custom duration (e.g. 30s for video content)
-    const duration = isAdmin && durationSeconds ? durationSeconds : 60;
     console.log(`Generating music... (${duration}s)`);
     const audioBuffer = await generateMusic(lyrics, genre || "hiphop", duration);
     console.log("Music generated, size:", audioBuffer.length, "bytes");

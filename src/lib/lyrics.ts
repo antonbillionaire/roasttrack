@@ -10,6 +10,7 @@ interface LyricsRequest {
   genre: string;
   roastLevel: string;
   language: string;
+  durationSeconds?: number;
 }
 
 // Genre-specific style guidance with reference songwriters
@@ -109,11 +110,81 @@ export async function generateLyrics({
   genre,
   roastLevel = "funny",
   language = "en",
+  durationSeconds = 60,
 }: LyricsRequest): Promise<string> {
   const config = GENRE_CONFIG[genre] || GENRE_CONFIG.hiphop;
   const levelInstructions = ROAST_LEVELS[roastLevel] || ROAST_LEVELS.funny;
   const langInstructions = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
   const factsText = facts.map((f, i) => `${i + 1}. ${f}`).join("\n");
+
+  const isShort = durationSeconds <= 30;
+
+  const structureBlock = isShort
+    ? `Write exactly 8 lines (this is a SHORT 30-second track):
+
+Verse (4 lines) — introduce "${name}", reference facts, roast them
+Chorus (4 lines) — catchy hook, use "${name}", singable chant
+
+Use "${name}" minimum 2 times across the song.
+
+TRANSITION RULES:
+- Line 4 of Verse must be SHORT (max 6 syllables) and feel FINAL
+- Chorus Line 1 MUST start with "${name}" or an exclamation (Oh!, Hey!, Yeah!)
+- Chorus = STACCATO, PUNCHY — each word lands like a chant people yell back
+- Verse = conversational, flowing, storytelling`
+    : `Write exactly 12 UNIQUE lines:
+
+Verse 1 (4 lines) — introduce "${name}", set scene, reference facts 1-2
+Chorus  (4 lines) — catchy hook, use "${name}", singable chant
+Verse 2 (4 lines) — dig deeper, remaining facts, escalate the roast
+Chorus  (copy-paste the EXACT same 4 lines from first Chorus)
+
+Use "${name}" minimum 3 times across the full song.
+
+TRANSITION RULES:
+- Line 4 of every Verse must be SHORT (max 6 syllables) and feel FINAL
+- Chorus Line 1 MUST start with "${name}" or an exclamation (Oh!, Hey!, Yeah!)
+- Chorus = STACCATO, PUNCHY — each word lands like a chant people yell back
+- Verse = conversational, flowing, storytelling
+- The contrast between Verse and Chorus must be obvious`;
+
+  const outputBlock = isShort
+    ? `Verse
+[line 1]
+[line 2]
+[line 3]
+[line 4]
+
+Chorus
+[line 1]
+[line 2]
+[line 3]
+[line 4]`
+    : `Verse 1
+[line 1]
+[line 2]
+[line 3]
+[line 4]
+
+Chorus
+[line 1]
+[line 2]
+[line 3]
+[line 4]
+
+Verse 2
+[line 1]
+[line 2]
+[line 3]
+[line 4]
+
+Chorus
+[line 1]
+[line 2]
+[line 3]
+[line 4]`;
+
+  const trackDuration = isShort ? "30-second" : "1-minute";
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
@@ -135,7 +206,7 @@ Study these artists' techniques: their rhyme patterns, hook structures, rhythmic
     messages: [
       {
         role: "user",
-        content: `Write lyrics for a 1-minute AI-sung ROAST track. The AI voice will SING these lyrics — write for SINGING, not reading.
+        content: `Write lyrics for a ${trackDuration} AI-sung ROAST track. The AI voice will SING these lyrics — write for SINGING, not reading.
 
 TARGET PERSON: "${name}"
 
@@ -182,21 +253,7 @@ Chorus lines are always 20-30% SHORTER than Verse lines.
 STEP 4 — STRUCTURE & TRANSITIONS
 ════════════════════════════════════
 
-Write exactly 12 UNIQUE lines:
-
-Verse 1 (4 lines) — introduce "${name}", set scene, reference facts 1-2
-Chorus  (4 lines) — catchy hook, use "${name}", singable chant
-Verse 2 (4 lines) — dig deeper, remaining facts, escalate the roast
-Chorus  (copy-paste the EXACT same 4 lines from first Chorus)
-
-Use "${name}" minimum 3 times across the full song.
-
-TRANSITION RULES:
-- Line 4 of every Verse must be SHORT (max 6 syllables) and feel FINAL
-- Chorus Line 1 MUST start with "${name}" or an exclamation (Oh!, Hey!, Yeah!)
-- Chorus = STACCATO, PUNCHY — each word lands like a chant people yell back
-- Verse = conversational, flowing, storytelling
-- The contrast between Verse and Chorus must be obvious
+${structureBlock}
 
 ════════════════════════════════════
 STEP 5 — RHYME & SINGABILITY
@@ -219,29 +276,7 @@ ${langInstructions}
 OUTPUT — write ONLY the lyrics, nothing else:
 ════════════════════════════════════
 
-Verse 1
-[line 1]
-[line 2]
-[line 3]
-[line 4]
-
-Chorus
-[line 1]
-[line 2]
-[line 3]
-[line 4]
-
-Verse 2
-[line 1]
-[line 2]
-[line 3]
-[line 4]
-
-Chorus
-[line 1]
-[line 2]
-[line 3]
-[line 4]`,
+${outputBlock}`,
       },
     ],
   });
