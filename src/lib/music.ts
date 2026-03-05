@@ -107,9 +107,9 @@ export async function generateMusic(lyrics: string, genre: string, durationSecon
   const sections: MusicSection[] = parsedSections.map((s) => ({
     section_name: s.name,
     positive_local_styles: s.name.toLowerCase().includes("chorus")
-      ? ["catchy hook", "energetic", "sing-along", "louder"]
-      : ["rhythmic", "flowing", "verse energy"],
-    negative_local_styles: [],
+      ? ["catchy hook", "energetic", "sing-along", "louder", "full band playing", "drums and bass"]
+      : ["full instrumental backing", "drums and bass from the start", "verse groove", "rhythmic beat"],
+    negative_local_styles: ["acapella", "no instruments", "silence", "spoken word", "vocals only"],
     duration_ms: Math.min(durationPerSection, 20000),
     lines: s.lines.slice(0, 4),
   }));
