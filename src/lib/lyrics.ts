@@ -44,6 +44,36 @@ const GENRE_CONFIG: Record<string, { style: string; syllables: string; bpm: stri
     syllables: "4-8 syllables per line (short, chant-like, repetitive)",
     bpm: "125-130 BPM",
   },
+  rnb: {
+    style: "smooth R&B with soulful vocals, groovy bassline, and silky melodies",
+    syllables: "6-10 syllables per line (smooth, melodic flow)",
+    bpm: "85-95 BPM",
+  },
+  trap: {
+    style: "trap with heavy 808 bass, hi-hat rolls, dark energy, and aggressive delivery",
+    syllables: "8-14 syllables per line (fast triplet flow, hard-hitting)",
+    bpm: "130-150 BPM",
+  },
+  jazz: {
+    style: "jazz/swing with smooth saxophone feel, walking bassline, and witty lounge delivery",
+    syllables: "6-10 syllables per line (conversational, swinging rhythm)",
+    bpm: "110-130 BPM",
+  },
+  afrobeat: {
+    style: "afrobeat with infectious rhythm, percussive groove, and joyful danceable energy",
+    syllables: "6-10 syllables per line (rhythmic, percussive flow)",
+    bpm: "100-120 BPM",
+  },
+  kpop: {
+    style: "K-pop with catchy hook, polished production, and addictive chorus",
+    syllables: "6-10 syllables per line (tight, catchy phrasing)",
+    bpm: "115-130 BPM",
+  },
+  metal: {
+    style: "heavy metal with aggressive vocals, distorted guitars, and raw power",
+    syllables: "6-10 syllables per line (aggressive, shout-ready)",
+    bpm: "140-180 BPM",
+  },
 };
 
 const ROAST_LEVELS: Record<string, string> = {
@@ -61,11 +91,16 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
 - Avoid abbreviations, acronyms, or words with silent letters
 - Prefer one-word or two-syllable rhymes (e.g., "day/way", "name/shame")`,
   ru: `Write ALL lyrics in Russian (Cyrillic). The entire song must be in Russian.
-- Use natural Russian slang and wordplay
-- Use simple words — avoid complex multi-syllable words that TTS will mispronounce
-- Prefer clear vowel endings for rhymes (e.g., "-ает/-ает", "-ой/-ой")
+CRITICAL RULES FOR RUSSIAN:
+- Use ONLY simple 2-3 syllable words with obvious, unambiguous stress
+- NEVER use words where stress changes meaning (замок, мука, белки, стрелки, etc.)
+- Each line: maximum 6-8 simple words
+- Prefer words ending in -ать, -ить, -ой, -ая, -ение
+- Use natural colloquial Russian, short punchy phrases
 - Do NOT use English words written in Cyrillic
-- Keep stress patterns natural and consistent`,
+- Do NOT use complex compound words or bureaucratic vocabulary
+- Rhymes must be clean and obvious: -ать/-ать, -ой/-ой, -ил/-ил, -ать/-ять
+- Think of how Тимати or Баста would write — simple, street, rhythmic`,
   es: `Write ALL lyrics in Spanish. The entire song must be in Spanish.
 - Use natural Spanish slang and wordplay
 - Prefer words with clear vowel endings for clean rhymes
@@ -94,6 +129,12 @@ export async function generateLyrics({
         content: `You are a songwriter for a 1-minute AI-sung roast track. The AI voice sings the lyrics — you must write for SINGING, not reading.
 
 TARGET PERSON: "${name}"
+
+GENDER: Determine the gender from the name "${name}".
+- If the name is clearly feminine (e.g., Sarah, Мария, Анна, Jessica) → use she/her pronouns. For Russian: use feminine verb forms (-ла, -ает) and feminine adjectives (-ая, -ная).
+- If the name is clearly masculine (e.g., Kevin, Дмитрий, Mike) → use he/him pronouns. For Russian: use masculine verb forms (-л, -ает) and masculine adjectives (-ой, -ный).
+- If ambiguous → default to he/him (masculine).
+THIS IS CRITICAL — wrong gender ruins the song.
 
 FACTS ABOUT THEM:
 ${factsText}
