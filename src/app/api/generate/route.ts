@@ -42,6 +42,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "At least one fact is required" }, { status: 400 });
     }
 
+    // Validate genre and roastLevel against allowed values
+    const VALID_GENRES = ["hiphop", "pop", "reggaeton", "country", "rock", "edm", "rnb", "afrobeat", "kpop"];
+    const VALID_LEVELS = ["funny", "hard", "extreme"];
+    const VALID_LANGUAGES = ["en", "ru", "es"];
+    if (genre && !VALID_GENRES.includes(genre)) {
+      return NextResponse.json({ error: "Invalid genre" }, { status: 400 });
+    }
+    if (roastLevel && !VALID_LEVELS.includes(roastLevel)) {
+      return NextResponse.json({ error: "Invalid roast level" }, { status: 400 });
+    }
+    if (language && !VALID_LANGUAGES.includes(language)) {
+      return NextResponse.json({ error: "Invalid language" }, { status: 400 });
+    }
+
     // Admin bypass via secret key (for batch scripts)
     const isAdminBySecret = adminSecret && process.env.ADMIN_SECRET && adminSecret === process.env.ADMIN_SECRET;
 
@@ -168,8 +182,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ id, isFreePreview });
   } catch (error) {
     console.error("Generation error:", error);
+    // Don't leak internal error messages (API keys, upload details) to client
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Generation failed" },
+      { error: "Generation failed. Please try again." },
       { status: 500 }
     );
   }

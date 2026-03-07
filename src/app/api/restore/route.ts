@@ -3,9 +3,9 @@ import { getUserByEmail } from "@/lib/db";
 import { rateLimit, getIP } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
-  // Rate limit: 5 requests per minute per IP
+  // Strict rate limit: 3 attempts per 5 minutes per IP (prevents email enumeration)
   const ip = getIP(req.headers);
-  const { allowed } = rateLimit(`restore:${ip}`, 5, 60_000);
+  const { allowed } = rateLimit(`restore:${ip}`, 3, 300_000);
   if (!allowed) {
     return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
   }

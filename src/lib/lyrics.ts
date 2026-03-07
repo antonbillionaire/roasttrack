@@ -107,12 +107,22 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
 WORD CHOICE:
 - Maximum 6-8 words per line (Verse), 4-6 words per line (Chorus)
 - Use ONLY simple 2-3 syllable words with obvious, unambiguous stress
-- BANNED words (ambiguous stress): замок, мука, белки, стрелки, писать, атлас, орган, хаос, ирис
+- BANNED words (ambiguous stress): замок, мука, белки, стрелки, писать, атлас, орган, хаос, ирис, дорога (use путь), красивый (use крутой), должен (use надо)
 - Preferred word endings: -ать, -ить, -ой, -ая, -ул, -ал, -ом
 - Style reference: Тимати, Баста, Oxxxymiron — street, punchy, colloquial
 - Natural spoken Russian — not textbook, not formal
 - Do NOT use English words written in Cyrillic
 - Do NOT use complex compound words or bureaucratic vocabulary
+
+SINGABILITY FOR AI VOICE (CRITICAL):
+- The AI singer does NOT know Russian stress rules — write words that are IMPOSSIBLE to mispronounce
+- AVOID 4+ syllable words — they get garbled when sung. Max 3 syllables per word
+- AVOID words where stress changes meaning: мУка/мукА, зАмок/замОк
+- PREFER words with stress on last syllable: пацАн, дружбАн, огОнь, пошЁл, нашЁл
+- PREFER words with obvious stress: мАма, пАпа, крУто, клАссно, жЁстко
+- Write lyrics that sound natural even if every word is read with WRONG stress — choose words where wrong stress still sounds OK
+- Each line must flow as ONE breath — no awkward pauses between words
+- Test mentally: read the line with monotone stress — does it still make sense? If not, rewrite
 
 GENDER ENFORCEMENT (check EVERY line):
 - FEMININE: прошла, сделала, она такая, крутая девушка

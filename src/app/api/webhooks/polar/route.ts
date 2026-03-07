@@ -51,6 +51,8 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error("Webhook processing error:", error);
+    // Return 500 so Polar retries the webhook (credits not lost)
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
